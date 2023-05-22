@@ -1,10 +1,11 @@
 import AppRouter from './AppRouter';
+import { SubstrateContextProvider } from './contexts/SubstrateContext';
 
 function App() {
   return (
-    <div>
+    <SubstrateContextProvider>
       <AppRouter />
-    </div>
+    </SubstrateContextProvider>
   );
 }
 
