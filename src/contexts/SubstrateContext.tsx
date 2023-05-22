@@ -20,7 +20,7 @@ export type API_STATE =
   | 'DISCONNECTED'
   | null;
 
-export type ChainStateType = {
+export type SubstrateStateType = {
   socket: string | string[];
   rpc: RPCType;
   types: object;
@@ -29,7 +29,7 @@ export type ChainStateType = {
   apiState: API_STATE;
 };
 
-const INIT_STATE: ChainStateType = {
+const INIT_STATE: SubstrateStateType = {
   socket: '',
   rpc: {},
   types,
@@ -47,9 +47,9 @@ type SubstrateAction =
 
 // Reducer function for `useReducer`
 const reducer = (
-  state: ChainStateType,
+  state: SubstrateStateType,
   action: SubstrateAction
-): ChainStateType => {
+): SubstrateStateType => {
   switch (action.type) {
     case 'CONNECT_INIT':
       return { ...state, apiState: 'CONNECT_INIT' };
@@ -68,7 +68,7 @@ const reducer = (
 
 // Connecting to the Substrate node
 const connect = (
-  state: ChainStateType,
+  state: SubstrateStateType,
   dispatch: (action: SubstrateAction) => void
 ) => {
   const { apiState, socket, rpc } = state;
@@ -101,7 +101,7 @@ const connect = (
   });
 };
 
-const SubstrateContext = createContext<ChainStateType | null>(null);
+const SubstrateContext = createContext<SubstrateStateType | null>(null);
 
 const SubstrateContextProvider = ({ children }: { children: ReactNode }) => {
   const initialState = {
@@ -113,7 +113,7 @@ const SubstrateContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     connect(state, dispatch);
-  }, []);
+  }, [state]);
 
   return (
     <SubstrateContext.Provider value={state}>
@@ -122,6 +122,6 @@ const SubstrateContextProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const useSubstrate = () => useContext(SubstrateContext);
+const useSubstrate = () => useContext(SubstrateContext) as SubstrateStateType;
 
 export { SubstrateContextProvider, useSubstrate };

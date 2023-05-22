@@ -1,5 +1,9 @@
 {
   "APP_NAME": "jumboshrimps",
+  "ss58Format": {
+    "CALAMARI": 78,
+    "DOLPHIN": 42
+  },
   "RPC": {
     "mantaPay": {
         "pull_ledger_diff": {

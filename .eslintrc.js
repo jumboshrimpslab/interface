@@ -8,7 +8,8 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
-    'plugin:import/recommended'
+    'plugin:import/recommended',
+    'plugin:react-hooks/recommended'
   ],
   globals: {
     process: true,
