@@ -86,7 +86,7 @@ const ConnectWalletBlock = ({
       )}
 
       {errorMessage && (
-        <p className="absolute -left-px -bottom-5 flex flex-row gap-2 b-0 text-warning text-xs">
+        <p className="absolute -left-px -bottom-5 flex items-center gap-2 text-warning text-xs">
           <Icon name="information" />
           {getDisplayedErrorMessage()}
         </p>
@@ -147,7 +147,7 @@ const ConnectWalletModal = ({ hideModal }: { hideModal: () => void }) => {
     <div className="w-[506px]">
       <h1 className="text-xl text-white">Connect Wallet</h1>
       <SubstrateConnectWalletBlock hideModal={hideModal} />
-      <p className="flex flex-row gap-2 mt-5 text-secondary text-xs">
+      <p className="flex items-center gap-2 mt-5 text-secondary text-xs">
         <Icon name="information" />
         Already installed? Try refreshing this page
       </p>
