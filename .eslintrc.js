@@ -27,6 +27,7 @@ module.exports = {
   plugins: ['react', '@typescript-eslint'],
   root: true,
   rules: {
+    '@typescript-eslint/ban-ts-comment': 'warn',
     'no-useless-escape': 'off',
     'react/react-in-jsx-scope': 'off',
     'linebreak-style': ['error', 'unix'],
@@ -50,6 +51,9 @@ module.exports = {
     'import/resolver': {
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx']
+      },
+      typescript: {
+        project: './'
       }
     }
   }
