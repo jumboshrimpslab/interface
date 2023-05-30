@@ -40,53 +40,47 @@ const ConnectWalletBlock = ({
     return getErrMsgAfterRemovePathname(errorMessage);
   };
 
-  const WalletNameBlock = () => {
-    return (
-      <div className="text-sm flex items-center gap-3 leading-5">
-        {walletName}
-      </div>
-    );
-  };
-
   return (
-    <div className="relative mt-6 p-4 flex items-center justify-between border border-white/10 text-white rounded-lg w-full">
+    <div className="relative mt-6 px-6 py-[18px] flex items-center bg-[#FFE49F] justify-between rounded-xl w-full">
       <div className="flex flex-row items-center gap-4">
         {walletLogo && typeof walletLogo === 'object' ? (
           <img
             src={walletLogo.src}
             alt={walletLogo.alt}
-            className="w-6 h-6 rounded-full"
+            className="w-10 h-10 rounded-full"
           />
         ) : (
           <Icon name={walletLogo} className="w-6 h-6 rounded-full" />
         )}
-        <WalletNameBlock />
+        <div className="text-primary text-xl">{walletName}</div>
       </div>
 
       {isWalletEnabled ? (
-        <div className="flex items-center justify-center text-xs w-[120px] h-10">
-          <div className="flex items-center gap-3">
-            <div className="rounded full w-2 h-2 bg-green-300" />
-            Connected
+        <div className="flex items-center justify-center text-base w-[120px] h-10">
+          <div className="flex items-center gap-2 ">
+            <div className="rounded-xl full w-3 h-3 bg-button-primary" />
+            <div className="text-secondary font-['Rammetto_One']">
+              Connected
+            </div>
           </div>
         </div>
       ) : isWalletInstalled ? (
         <button
           onClick={connectHandler}
-          className="rounded-lg bg-button-thirdry text-white text-sm w-[120px] h-10"
+          className="rounded-xl bg-button-primary text-white text-base font-['Rammetto_One'] w-[117px] h-[52px]"
         >
           Connect
         </button>
       ) : (
         <a href={walletInstallLink} target="_blank" rel="noreferrer">
-          <div className="text-center rounded-lg bg-button-fourth text-white text-sm w-[120px] h-10 leading-10">
+          <div className="text-center rounded-xl bg-button-primary text-white text-base font-['Rammetto_One'] w-[117px] h-[52px] leading-[52px]">
             Install
           </div>
         </a>
       )}
 
       {errorMessage && (
-        <p className="absolute -left-px -bottom-5 flex items-center gap-2 text-warning text-xs">
+        <p className="absolute -left-px -bottom-5 flex items-center gap-2 text-primary text-xs">
           <Icon name="information" />
           {getDisplayedErrorMessage()}
         </p>
@@ -144,11 +138,12 @@ export const SubstrateConnectWalletBlock = ({
 
 const ConnectWalletModal = ({ hideModal }: { hideModal: () => void }) => {
   return (
-    <div className="w-[506px]">
-      <h1 className="text-xl text-white">Connect Wallet</h1>
+    <div className="w-[509px]">
+      <h1 className="text-[32px] leading-10 text-secondary font-['Rammetto_One']">
+        Connect Wallet
+      </h1>
       <SubstrateConnectWalletBlock hideModal={hideModal} />
-      <p className="flex items-center gap-2 mt-5 text-secondary text-xs">
-        <Icon name="information" />
+      <p className="text-primary text-base leading-5 mt-4">
         Already installed? Try refreshing this page
       </p>
     </div>

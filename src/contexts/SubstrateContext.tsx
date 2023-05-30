@@ -8,7 +8,11 @@ import {
 } from 'react';
 import config from '../config';
 import types from '../config/types.json';
-import type { DefinitionRpc, DefinitionRpcSub } from '@polkadot/types/types';
+import type {
+  DefinitionRpc,
+  DefinitionRpcSub,
+  RegistryTypes
+} from '@polkadot/types/types';
 
 type RPCType = Record<string, Record<string, DefinitionRpc | DefinitionRpcSub>>;
 
@@ -23,7 +27,7 @@ export type API_STATE =
 export type SubstrateStateType = {
   socket: string | string[];
   rpc: RPCType;
-  types: object;
+  types: RegistryTypes;
   api: ApiPromise | null;
   apiError: Error | null;
   apiState: API_STATE;
@@ -71,14 +75,14 @@ const connect = (
   state: SubstrateStateType,
   dispatch: (action: SubstrateAction) => void
 ) => {
-  const { apiState, socket, rpc } = state;
+  const { apiState, socket, rpc, types } = state;
   // We only want this function to be performed once
   if (apiState) return;
 
   dispatch({ type: 'CONNECT_INIT' });
 
   const provider = new WsProvider(socket);
-  const _api = new ApiPromise({ provider, rpc });
+  const _api = new ApiPromise({ provider, types, rpc });
 
   // Set listeners for disconnection and reconnection event.
   _api.on('connected', () => {

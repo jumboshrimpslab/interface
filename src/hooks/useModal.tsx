@@ -94,9 +94,9 @@ export const useModal: (options?: IUseModal) => any = (
               }}
             />
             {!closeDisabled ? (
-              <div className="relative inline-block p-6 bg-primary rounded-xl text-black">
+              <div className="relative px-12 py-6 bg-white rounded-3xl text-primary">
                 <div
-                  className="absolute top-5 right-7 text-black dark:text-white cursor-pointer text-lg"
+                  className="absolute top-8 right-12 cursor-pointer"
                   onClick={() => hideModal()}
                 >
                   <Icon name="close" />
@@ -104,7 +104,7 @@ export const useModal: (options?: IUseModal) => any = (
                 {children}
               </div>
             ) : (
-              <div className="relative inline-block px-6 py-4 rounded-lg bg-secondary text-white">
+              <div className="relative px-12 py-6 bg-white rounded-3xl text-primary">
                 {children}
               </div>
             )}
