@@ -221,6 +221,20 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
   }, [apiState, isKeyringInit]);
 
   useEffect(() => {
+    let unsub: any = null;
+    async function subAccounts() {
+      if (!selectedWallet?.subscribeAccounts) {
+        return;
+      }
+      unsub = await selectedWallet.subscribeAccounts(() => {
+        refreshWalletAccounts(selectedWallet);
+      });
+    }
+    subAccounts().catch(console.error);
+    return () => unsub && unsub();
+  }, [selectedWallet]);
+
+  useEffect(() => {
     // use authedWalletInitialized.current to make sure only initilize authedWalletList once
     if (!isKeyringInit || authedWalletInitialized.current) {
       return;

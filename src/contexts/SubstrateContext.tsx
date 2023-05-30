@@ -93,15 +93,15 @@ const connect = (
   });
   _api.on('ready', () => {
     dispatch({ type: 'CONNECT_SUCCESS' });
-    console.log('ready');
+    console.log('api ready');
   });
   _api.on('disconnected', () => {
     dispatch({ type: 'DISCONNECTED' });
-    console.log('disconnected');
+    console.log('api disconnected');
   });
   _api.on('error', err => {
     dispatch({ type: 'CONNECT_ERROR', payload: err });
-    console.log('err', err);
+    console.log('api err', err);
   });
 };
 
