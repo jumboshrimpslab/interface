@@ -1,9 +1,11 @@
 {
   "APP_NAME": "jumboshrimps",
-  "ss58Format": {
+  "SS58_FORMAT": {
     "CALAMARI": 78,
     "DOLPHIN": 42
   },
+  "SUBSCAN_API_KEY": "35770f43091fd396d35192f5b6c499db",
+  "COINGECKO_PROXY_URL": "https://52rhbkf39l.execute-api.eu-central-1.amazonaws.com/prod",
   "RPC": {
     "mantaPay": {
         "pull_ledger_diff": {

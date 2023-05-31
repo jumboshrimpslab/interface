@@ -1,35 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useSubstrate } from 'contexts/SubstrateContext';
 import { useAccount } from 'contexts/AccountContext';
-import type { KeyringPair } from '@polkadot/keyring/types';
+import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
+import { useUserLotteryData } from 'contexts/UserLotteryDataContext';
 
 function Home() {
-  const { api, apiState } = useSubstrate();
   const { selectedAccount } = useAccount();
-  const [balance, setBalance] = useState<string>('');
+  const globalLotteryData = useGlobalLotteryData();
+  const userLotteryData = useUserLotteryData();
 
-  const fetchPublicBalance = useCallback(
-    async (account: KeyringPair | null) => {
-      if (!api || apiState !== 'READY' || !account?.address) {
-        return;
-      }
-      const raw: any = await api.query.system.account(account?.address);
-      const rawBalance = raw?.data?.free.toString();
-
-      setBalance(rawBalance.toString());
-    },
-    [api, apiState]
-  );
-
-  useEffect(() => {
-    fetchPublicBalance(selectedAccount);
-  }, [fetchPublicBalance, selectedAccount]);
+  console.log('globalLotteryData', globalLotteryData);
+  console.log('userLotteryData', userLotteryData);
 
   return (
     <div className="text-white text-center">
       <h1 className="text-3xl h-32 leading-[128px]">Welcome to JumboShrimps</h1>
       <div>address: {selectedAccount?.address}</div>
-      <div>balance: {balance}</div>
+      <div>balance: {userLotteryData?.userNonStakedBalance?.toString()}</div>
     </div>
   );
 }

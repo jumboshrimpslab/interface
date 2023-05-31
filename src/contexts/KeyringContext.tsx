@@ -205,15 +205,8 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
     function initKeyring() {
       if (apiState === 'READY' && !isKeyringInit) {
         // just template, will change in the future
-        const isCalamari = window.location.pathname?.includes('calamari');
-        keyring.loadAll(
-          {
-            ss58Format: isCalamari
-              ? config.ss58Format.CALAMARI
-              : config.ss58Format.DOLPHIN
-          },
-          []
-        );
+        // const isCalamari = window.location.pathname?.includes('calamari');
+        keyring.loadAll({ ss58Format: config.SS58_FORMAT.CALAMARI }, []);
         setIsKeyringInit(true);
       }
     }
