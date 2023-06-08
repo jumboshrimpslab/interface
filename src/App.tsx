@@ -9,7 +9,7 @@ import { AxiosContextProvider } from './contexts/AxiosContext';
 
 function App() {
   return (
-    <div className="min-h-screen bg-primary">
+    <div className="min-h-screen">
       <AxiosContextProvider>
         <UsdValueContextProvider>
           <SubstrateContextProvider>

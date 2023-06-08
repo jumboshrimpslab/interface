@@ -5,7 +5,11 @@ import DisplayAccountButton from './DisplayAccountButton';
 const Connect = () => {
   const { selectedAccount } = useAccount();
 
-  return selectedAccount ? <DisplayAccountButton /> : <ConnectWallet />;
+  return selectedAccount ? (
+    <DisplayAccountButton />
+  ) : (
+    <ConnectWallet buttonWithIcon={true} />
+  );
 };
 
 export default Connect;

@@ -34,7 +34,7 @@ const SingleAccountDisplay = ({
     <div
       key={accountAddress}
       className={classNames(
-        'bg-white bg-opacity-5 cursor-pointer flex items-center gap-5 justify-between border border-[#FFFFFF1A] rounded-lg px-3 text-green w-68 h-16'
+        'bg-primary cursor-pointer flex items-center gap-5 justify-between rounded-lg px-3 w-68 h-16'
       )}
       onClick={onClickAccountHandler}
     >
@@ -43,7 +43,7 @@ const SingleAccountDisplay = ({
           <AccountIcon />
           <div className="flex flex-col">
             <div className="text-base">{succinctAccountName}</div>
-            <div className="flex flex-row items-center gap-2 text-white text-opacity-60 text-sm">
+            <div className="flex flex-row items-center gap-2 text-sm">
               {succinctAddress}
               <CopyPasteIcon
                 iconClassName="w-5 h-5"

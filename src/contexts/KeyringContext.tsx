@@ -174,32 +174,29 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
     ]
   );
 
-  const connectWalletExtensions = useCallback(
-    async (extensionNames: string[]) => {
-      let walletNames = [...authedWalletList];
-      const lastAccessExtensionName = getLastAccessedWallet()?.extensionName;
-      for (const extensionName of extensionNames.filter(
-        name => name !== lastAccessExtensionName
-      )) {
-        const isConnectedSuccess = await connectWallet(extensionName, false);
-        if (isConnectedSuccess) {
-          walletNames = addWalletName(extensionName, walletNames);
-        }
+  const connectWalletExtensions = async (extensionNames: string[]) => {
+    let walletNames: string[] = [];
+    const lastAccessExtensionName = getLastAccessedWallet()?.extensionName;
+    for (const extensionName of extensionNames.filter(
+      name => name !== lastAccessExtensionName
+    )) {
+      const isConnectedSuccess = await connectWallet(extensionName, false);
+      if (isConnectedSuccess) {
+        walletNames = addWalletName(extensionName, walletNames);
       }
-      if (lastAccessExtensionName) {
-        const isConnectedSuccess = await connectWallet(
-          lastAccessExtensionName,
-          true
-        );
-        if (isConnectedSuccess) {
-          walletNames = addWalletName(lastAccessExtensionName, walletNames);
-        }
+    }
+    if (lastAccessExtensionName) {
+      const isConnectedSuccess = await connectWallet(
+        lastAccessExtensionName,
+        true
+      );
+      if (isConnectedSuccess) {
+        walletNames = addWalletName(lastAccessExtensionName, walletNames);
       }
-      setAuthedWalletList(walletNames);
-      setAuthedWalletListStorage(walletNames);
-    },
-    [connectWallet, authedWalletList]
-  );
+    }
+    setAuthedWalletList(walletNames);
+    setAuthedWalletListStorage(walletNames);
+  };
 
   useEffect(() => {
     function initKeyring() {
@@ -216,7 +213,10 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let unsub: any = null;
     async function subAccounts() {
-      if (!selectedWallet?.subscribeAccounts) {
+      if (
+        !selectedWallet?.subscribeAccounts ||
+        !authedWalletInitialized.current
+      ) {
         return;
       }
       unsub = await selectedWallet.subscribeAccounts(() => {
@@ -228,16 +228,19 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
   }, [selectedWallet]);
 
   useEffect(() => {
-    // use authedWalletInitialized.current to make sure only initilize authedWalletList once
-    if (!isKeyringInit || authedWalletInitialized.current) {
-      return;
+    async function connectWallets() {
+      // use authedWalletInitialized.current to make sure only initilize authedWalletList once
+      if (!isKeyringInit || authedWalletInitialized.current) {
+        return;
+      }
+      const prevAuthedWalletList = getAuthedWalletListStorage();
+      if (prevAuthedWalletList.length !== 0) {
+        await connectWalletExtensions(prevAuthedWalletList);
+      }
+      authedWalletInitialized.current = true;
     }
-    const prevAuthedWalletList = getAuthedWalletListStorage();
-    if (prevAuthedWalletList.length !== 0) {
-      connectWalletExtensions(prevAuthedWalletList);
-    }
-    authedWalletInitialized.current = true;
-  }, [isKeyringInit, connectWalletExtensions]);
+    connectWallets().catch(console.error);
+  }, [isKeyringInit]);
 
   const state = useMemo(
     () => ({

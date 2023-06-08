@@ -31,7 +31,7 @@ const CopyPasteIcon: React.FC<ICopyPastIconProps> = ({
   return (
     <div
       className={classNames(
-        'cursor-pointer hover:text-[#0d7bc5] h-5',
+        'cursor-pointer hover:text-[#ff6d01] h-5',
         btnClassName
       )}
       onClick={e => copyToClipboard(e)}

@@ -80,7 +80,7 @@ const ConnectWalletBlock = ({
       )}
 
       {errorMessage && (
-        <p className="absolute -left-px -bottom-5 flex items-center gap-2 text-primary text-xs">
+        <p className="absolute -left-px -bottom-5 flex items-center gap-2 text-warning text-sm">
           <Icon name="information" />
           {getDisplayedErrorMessage()}
         </p>
@@ -139,7 +139,7 @@ export const SubstrateConnectWalletBlock = ({
 const ConnectWalletModal = ({ hideModal }: { hideModal: () => void }) => {
   return (
     <div className="w-[509px]">
-      <h1 className="text-[32px] leading-10 text-secondary font-['Rammetto_One']">
+      <h1 className="text-2xl leading-10 text-secondary font-['Rammetto_One']">
         Connect Wallet
       </h1>
       <SubstrateConnectWalletBlock hideModal={hideModal} />

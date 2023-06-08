@@ -18,10 +18,12 @@ const SubstrateWallets = () => {
 
   return (
     <>
-      {enabledExtentions.map(wallet => (
+      {enabledExtentions.map((wallet, index) => (
         <button
-          className={classNames('px-5 py-5 rounded-t-lg', {
-            'bg-primary': wallet.extensionName === selectedWallet?.extensionName
+          className={classNames('px-5 py-5', {
+            'bg-[#FF6B00]':
+              wallet.extensionName === selectedWallet?.extensionName,
+            'rounded-tl-lg': index === 0
           })}
           key={wallet.extensionName}
           onClick={onClickWalletIconHandler(wallet)}
