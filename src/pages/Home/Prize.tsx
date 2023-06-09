@@ -5,7 +5,7 @@ const Prize = () => {
   const { ModalWrapper, showModal, hideModal } = useModal();
   return (
     <div>
-      <div className="h-[202px] bg-gradient-to-r from-[#FF6B00] to-[#FFCE51] rounded-3xl flex items-center justify-between px-12 text-[#fff8ee]">
+      <div className="h-[202px] bg-gradient-to-r from-[#FF6B00] to-[#FFCE51] rounded-3xl flex items-center justify-between px-12 text-tertiary">
         <div>
           <div className="font-content text-2xl leading-[30px] font-extrabold mb-2">
             Coming Soon

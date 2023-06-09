@@ -1,16 +1,13 @@
-import { useState } from 'react';
 import classNames from 'classnames';
-import store from 'store';
+import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 import Account from './Account';
 import Prize from './Prize';
 
 const PrizeAndAccount = () => {
-  const [isPrizeSelected, setIsPrizeSelected] = useState(
-    store.get('isPrizeTabSelected', true)
-  );
+  const { isPrizeTabSelected, setIsPrizeTabSelected } = useGlobalLotteryData();
+
   const changeTabMennu = (bool: boolean) => {
-    store.set('isPrizeTabSelected', bool);
-    setIsPrizeSelected(bool);
+    setIsPrizeTabSelected(bool);
   };
   return (
     <div className="w-[1200px] mx-auto mb-[50px]">
@@ -20,9 +17,9 @@ const PrizeAndAccount = () => {
           className={classNames(
             'w-[248px] h-[50px] rounded-[40px] font-title',
             {
-              'bg-button-primary text-white': isPrizeSelected,
-              'bg-button-primary/20 text-secondary/50 border border-[#FF6E03]/50':
-                !isPrizeSelected
+              'bg-button-primary text-white': isPrizeTabSelected,
+              'bg-button-primary/20 text-secondary/50 border border-primary/50':
+                !isPrizeTabSelected
             }
           )}
         >
@@ -33,16 +30,16 @@ const PrizeAndAccount = () => {
           className={classNames(
             'w-[248px] h-[50px] rounded-[40px] font-title',
             {
-              'bg-button-primary text-white': !isPrizeSelected,
-              'bg-button-primary/20 text-secondary/50 border border-[#FF6E03]/50':
-                isPrizeSelected
+              'bg-button-primary text-white': !isPrizeTabSelected,
+              'bg-button-primary/20 text-secondary/50 border border-primary/50':
+                isPrizeTabSelected
             }
           )}
         >
           Account
         </button>
       </div>
-      {isPrizeSelected ? <Prize /> : <Account />}
+      {isPrizeTabSelected ? <Prize /> : <Account />}
     </div>
   );
 };

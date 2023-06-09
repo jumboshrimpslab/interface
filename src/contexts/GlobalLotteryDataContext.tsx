@@ -4,16 +4,27 @@ import {
   useContext,
   ReactNode,
   useMemo,
-  useEffect
+  useEffect,
+  useCallback
 } from 'react';
 import BN from 'bn.js';
 import axios from 'axios';
+import store from 'store';
 import Balance from 'classes/Balance';
 import { useSubstrate } from './SubstrateContext';
 import { useAxios } from './AxiosContext';
 
 type GlobalLotteryDataContextValue = {
   sumOfDeposits: Balance | null;
+  totalDeposits: number | null;
+  minDeposit: Balance | null;
+  minWithdraw: Balance | null;
+  currentPrizePool: Balance | null;
+  nextDrawingBlockNumber: number | null;
+  drawingFreezoutIsActive: boolean | null;
+  currentBlockNumber: number | null;
+  isPrizeTabSelected: boolean;
+  setIsPrizeTabSelected: (_: boolean) => void;
 };
 const GlobalLotteryDataContext =
   createContext<GlobalLotteryDataContextValue | null>(null);
@@ -47,6 +58,16 @@ const GlobalLotteryDataContextProvider = ({
   const [currentBlockNumber, setCurrentBlockNumber] = useState<number | null>(
     null
   );
+
+  // tabMenu
+  const [isPrizeTabSelected, _setIsPrizeTabSelected] = useState<boolean>(
+    store.get('isPrizeTabSelected', true)
+  );
+
+  const setIsPrizeTabSelected = useCallback((selected: boolean) => {
+    _setIsPrizeTabSelected(selected);
+    store.set('isPrizeTabSelected', selected);
+  }, []);
 
   const drawingFreezoutIsActive = useMemo(() => {
     if (
@@ -180,7 +201,7 @@ const GlobalLotteryDataContextProvider = ({
         return;
       }
       await api.isReady;
-      unsub = await api.query.lottery.sumOfDeposits(handleChangeSumOfDesposits);
+      unsub = await api.query.lottery.totalPot(handleChangeSumOfDesposits);
     };
 
     let unsub: any;
@@ -213,7 +234,9 @@ const GlobalLotteryDataContextProvider = ({
       drawingFreezoutIsActive,
       minDeposit,
       minWithdraw,
-      currentPrizePool
+      currentPrizePool,
+      isPrizeTabSelected,
+      setIsPrizeTabSelected
     }),
     [
       sumOfDeposits,
@@ -223,7 +246,9 @@ const GlobalLotteryDataContextProvider = ({
       drawingFreezoutIsActive,
       minDeposit,
       minWithdraw,
-      currentPrizePool
+      currentPrizePool,
+      isPrizeTabSelected,
+      setIsPrizeTabSelected
     ]
   );
 

@@ -41,7 +41,7 @@ const ConnectWalletBlock = ({
   };
 
   return (
-    <div className="relative mt-6 px-6 py-[18px] flex items-center bg-[#FFE49F] justify-between rounded-xl w-full">
+    <div className="relative mt-6 px-6 py-[18px] flex items-center bg-primary justify-between rounded-xl w-full">
       <div className="flex flex-row items-center gap-4">
         {walletLogo && typeof walletLogo === 'object' ? (
           <img

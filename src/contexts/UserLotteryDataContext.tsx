@@ -15,6 +15,9 @@ import { useAccount } from './AccountContext';
 
 type UserLotteryDataContextValue = {
   userNonStakedBalance: Balance | null;
+  userUnclaimedWinnings: Balance | null;
+  userPendingWithdrawals: PendingWithdrawal[] | null;
+  userLotteryActiveBalance: Balance | null;
 };
 
 type PendingWithdrawal = {
@@ -38,10 +41,10 @@ const UserLotteryDataContextProvider = ({
   const [userLotteryActiveBalance, setUserLotteryActiveBalance] =
     useState<Balance | null>(null);
   const [userUnclaimedWinnings, setUserUnclaimedWinnings] =
-    useState<Balance | null>();
+    useState<Balance | null>(null);
   const [userPendingWithdrawals, setUserPendingWithdrawals] = useState<
     PendingWithdrawal[] | null
-  >();
+  >(null);
 
   useEffect(() => {
     const handleUpdatePendingWithdrawals = (pendingWithdrawalsRaw: any) => {

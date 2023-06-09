@@ -34,7 +34,7 @@ const Account = () => {
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="font-content w-[590px] h-[320px] rounded-3xl bg-gradient-to-b from-[#FF6B00] to-[#FFA800] text-left p-12 text-[#fff8ee] relative">
+        <div className="font-content w-[590px] h-[320px] rounded-3xl bg-gradient-to-b from-[#FF6B00] to-[#FFA800] text-left p-12 text-tertiary relative">
           <div className="text-2xl leading-[30px] font-extrabold">
             Total Balance
           </div>
@@ -53,7 +53,7 @@ const Account = () => {
                 ' rounded-xl w-[235px] h-[66px] font-title text-xl',
                 {
                   'bg-button-primary': !disabled,
-                  'border border-[#FF6E03]/50 bg-[#FF6E03]/20 text-[#FC6A00]/80 cursor-not-allowed':
+                  'border border-primary/50 bg-secondary/20 text-secondary/80 cursor-not-allowed':
                     disabled
                 }
               )}
@@ -70,7 +70,7 @@ const Account = () => {
                 ' rounded-xl w-[235px] h-[66px] font-title text-xl',
                 {
                   'bg-white text-secondary': !disabled,
-                  'border border-[#FFF]/50 bg-[#FFF]/20 text-[#FFF]/80 cursor-not-allowed':
+                  'border border-white/50 bg-white/20 text-white/80 cursor-not-allowed':
                     disabled
                 }
               )}

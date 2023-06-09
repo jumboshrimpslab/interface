@@ -13,7 +13,7 @@ const Banner = () => {
   const ButtonBlock = () => {
     if (drawHasEnded) {
       return (
-        <button className="bg-[#FC6A00]/20 border border-[#FC6A00]/50 text-secondary/80 px-[48px] h-[66px] font-title text-xl rounded-xl cursor-default">
+        <button className="bg-button-primary/20 border border-primary/50 text-secondary/80 px-[48px] h-[66px] font-title text-xl rounded-xl cursor-default">
           Deposit for draw #4 has ended
         </button>
       );
@@ -23,7 +23,7 @@ const Banner = () => {
         <>
           <button
             onClick={showModal}
-            className="bg-[#FC6A00] w-[280px] h-[66px] font-title text-xl rounded-xl"
+            className="bg-button-primary w-[280px] h-[66px] font-title text-xl rounded-xl"
           >
             Deposit Now
           </button>

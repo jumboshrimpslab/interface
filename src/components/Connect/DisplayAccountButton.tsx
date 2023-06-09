@@ -34,7 +34,7 @@ const DisplayAccountButton = () => {
 
         {showAccountList && (
           <div className="w-80 flex flex-col mt-3 absolute right-0 top-full rounded-lg">
-            <div className="flex flex-row items-center justify-between bg-[#FFEDC0] rounded-t-lg">
+            <div className="flex flex-row items-center justify-between bg-primary rounded-t-lg">
               <div className="flex flex-row items-center">
                 <WalletSelectIconBar />
               </div>

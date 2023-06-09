@@ -3,10 +3,12 @@ import classNames from 'classnames';
 import { useState } from 'react';
 import Calculator from 'resources/images/calculator.png';
 import Clock from 'resources/images/clock.png';
+import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 
 const DataBoard = () => {
   const [totalPotIsSelected, setTotalPotIsSelected] = useState(true);
-  const amount = totalPotIsSelected ? 131329923 : 31020;
+  const { sumOfDeposits } = useGlobalLotteryData();
+  const totalAmount = totalPotIsSelected ? sumOfDeposits?.toString(0) : 99999;
   const renderer = ({ days, hours, minutes, seconds }: any) => {
     return (
       <div className="flex">
@@ -50,7 +52,7 @@ const DataBoard = () => {
               'w-[248px] h-[50px] rounded-[40px] font-title',
               {
                 'bg-button-primary text-white': totalPotIsSelected,
-                'bg-button-primary/20 text-secondary/50 border border-[#FF6E03]/50':
+                'bg-button-primary/20 text-secondary/50 border border-primary/50':
                   !totalPotIsSelected
               }
             )}
@@ -63,7 +65,7 @@ const DataBoard = () => {
               'w-[248px] h-[50px] rounded-[40px] font-title',
               {
                 'bg-button-primary text-white': !totalPotIsSelected,
-                'bg-button-primary/20 text-secondary/50 border border-[#FF6E03]/50':
+                'bg-button-primary/20 text-secondary/50 border border-primary/50':
                   totalPotIsSelected
               }
             )}
@@ -74,7 +76,7 @@ const DataBoard = () => {
         <div className="flex justify-center">
           <div className="flex items-center gap-2 mt-[15px]">
             <span className="font-title text-[40px] leading-[68px]">
-              {amount.toLocaleString()}
+              {Number(totalAmount)?.toLocaleString()}
             </span>
             <span className="font-content text-base font-black">MANTA</span>
           </div>
