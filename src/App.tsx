@@ -1,5 +1,6 @@
 import { UserLotteryDataContextProvider } from 'contexts/UserLotteryDataContext';
 import { GlobalLotteryDataContextProvider } from 'contexts/GlobalLotteryDataContext';
+import { LotteryTxContextProvider } from 'contexts/LotteryTxContext';
 import AppRouter from './AppRouter';
 import { SubstrateContextProvider } from './contexts/SubstrateContext';
 import { KeyringContextProvider } from './contexts/KeyringContext';
@@ -17,7 +18,9 @@ function App() {
               <AccountContextProvider>
                 <GlobalLotteryDataContextProvider>
                   <UserLotteryDataContextProvider>
-                    <AppRouter />
+                    <LotteryTxContextProvider>
+                      <AppRouter />
+                    </LotteryTxContextProvider>
                   </UserLotteryDataContextProvider>
                 </GlobalLotteryDataContextProvider>
               </AccountContextProvider>

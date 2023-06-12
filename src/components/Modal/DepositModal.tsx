@@ -14,6 +14,7 @@ import Balance from 'classes/Balance';
 import { useSubstrate } from 'contexts/SubstrateContext';
 import { useAccount } from 'contexts/AccountContext';
 import calculateWinningChance from 'utils/display/calculateWinningChance';
+import { useLotteryTx } from 'contexts/LotteryTxContext';
 import type { Signer } from '@polkadot/api/types';
 
 const decimals = AssetType.Native().numberOfDecimals;
@@ -42,23 +43,37 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   } = useGlobalLotteryData();
   const { api, apiState } = useSubstrate();
   const { selectedAccount } = useAccount();
+  const { withdrawTxFee } = useLotteryTx();
+
   const [winningChance, setWinningChance] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [value, setValue] = useState<Nullable<number | null>>(null);
   const [transferErrMsg, setTransferErrMsg] = useState('');
 
   const validateInputValue = (inputValue: number | null) => {
-    if (!inputValue || sumOfDeposits === null) {
+    if (
+      !inputValue ||
+      !sumOfDeposits ||
+      !minDeposit ||
+      !api ||
+      !withdrawTxFee
+    ) {
       validateErrMsg && setValidateErrMsg('');
       setIsButtonDisabled(true);
       return;
     }
-    const inputBalanceValue = Balance.Native(
-      new BN(inputValue).mul(new BN(10).pow(new BN(decimals)))
+    const inputBalanceValue = Balance.fromBaseUnits(
+      AssetType.Native(),
+      new Decimal(inputValue)
     );
+    const existentialDeposit = new Balance(
+      AssetType.Native(),
+      AssetType.Native().existentialDeposit
+    );
+    const reservedBalance = existentialDeposit.add(withdrawTxFee);
     if (
       userNonStakedBalance !== null &&
-      inputBalanceValue.gt(userNonStakedBalance)
+      inputBalanceValue.gt(userNonStakedBalance.sub(reservedBalance))
     ) {
       setValidateErrMsg('Insufficient Balance');
       !isButtonDisabled && setIsButtonDisabled(true);
