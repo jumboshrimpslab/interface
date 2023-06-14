@@ -149,6 +149,7 @@ const GlobalLotteryDataContextProvider = ({
         setNextDrawingBlockNumber(response.data.result);
       } catch (error) {
         console.error(error);
+        setNextDrawingBlockNumber(null);
       }
     };
     nextDrawingBlockNumber();

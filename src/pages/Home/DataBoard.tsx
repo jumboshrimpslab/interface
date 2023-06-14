@@ -1,17 +1,72 @@
 import Countdown, { zeroPad } from 'react-countdown';
 import classNames from 'classnames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Calculator from 'resources/images/calculator.png';
 import Clock from 'resources/images/clock.png';
 import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 
+const CountdownPlaceholder = () => {
+  return (
+    <div className="flex">
+      <span className="w-[78px] flex flex-col items-center">
+        -
+        <span className="font-content text-sm leading-[18px] font-bold">
+          DAY
+        </span>
+      </span>
+      <span className="w-[78px] flex flex-col items-center">
+        -
+        <span className="font-content text-sm leading-[18px] font-bold">
+          HOUR
+        </span>
+      </span>
+      <span className="w-[78px] flex flex-col items-center">
+        -
+        <span className="font-content text-sm leading-[18px] font-bold">
+          MINUTE
+        </span>
+      </span>
+      <span className="w-[78px] flex flex-col items-center">
+        -
+        <span className="font-content text-sm leading-[18px] font-bold">
+          SECOND
+        </span>
+      </span>
+    </div>
+  );
+};
+
 const DataBoard = () => {
   const [totalPotIsSelected, setTotalPotIsSelected] = useState(true);
-  const { sumOfDeposits, currentPrizePool } = useGlobalLotteryData();
+  const [nextDrawingTime, setNextDrawingTime] = useState<Date | undefined>(
+    undefined
+  );
+  const {
+    sumOfDeposits,
+    currentPrizePool,
+    nextDrawingBlockNumber,
+    currentBlockNumber
+  } = useGlobalLotteryData();
+
+  useEffect(() => {
+    if (!currentBlockNumber || !nextDrawingBlockNumber) {
+      return;
+    }
+    const blocksUntilNextDrawing = nextDrawingBlockNumber - currentBlockNumber;
+    const nextDrawingTime = blocksUntilNextDrawing * 12;
+    const currentTime = new Date().getTime();
+    setNextDrawingTime(new Date(currentTime + nextDrawingTime * 1000));
+  }, [currentBlockNumber, nextDrawingBlockNumber]);
+
   const totalAmount = totalPotIsSelected
     ? sumOfDeposits?.toString(0)
     : currentPrizePool?.toString(2);
-  const renderer = ({ days, hours, minutes, seconds }: any) => {
+  const totalAmountString = totalAmount
+    ? Number(totalAmount).toLocaleString()
+    : '--';
+
+  const renderer = (time: any) => {
+    const { days, hours, minutes, seconds } = time;
     return (
       <div className="flex">
         <span className="w-[78px] flex flex-col items-center">
@@ -44,6 +99,7 @@ const DataBoard = () => {
       </div>
     );
   };
+
   return (
     <div className="w-[1200px] flex items-center justify-between mx-auto my-6">
       <div className="w-[590px] h-[182px] rounded-3xl bg-primary px-[37px] py-6 relative">
@@ -78,9 +134,11 @@ const DataBoard = () => {
         <div className="flex justify-center">
           <div className="flex items-center gap-2 mt-[15px]">
             <span className="font-title text-[40px] leading-[68px]">
-              {Number(totalAmount)?.toLocaleString()}
+              {totalAmountString}
             </span>
-            <span className="font-content text-base font-black">MANTA</span>
+            {totalAmount && (
+              <span className="font-content text-base font-black">MANTA</span>
+            )}
           </div>
         </div>
         <img
@@ -94,10 +152,18 @@ const DataBoard = () => {
       <div className="w-[590px] h-[182px] rounded-3xl bg-primary relative">
         <div className="font-content text-sm mt-6">Time Left for</div>
         <div className="font-title text-secondary text-[24px] leading-6 mt-1">
-          Draw #4
+          Draw #1
         </div>
         <div className="font-title text-[40px] leading-[68px] flex justify-center mt-2">
-          <Countdown date={1686499200000} renderer={renderer} />
+          {nextDrawingTime ? (
+            <Countdown
+              key={nextDrawingTime.getTime()}
+              date={nextDrawingTime.getTime()}
+              renderer={renderer}
+            />
+          ) : (
+            <CountdownPlaceholder />
+          )}
         </div>
         <img
           className="absolute top-[31px] -right-[58px]"
