@@ -1,20 +1,20 @@
-import { useState } from 'react';
 import BannerImage from 'resources/images/banner.png';
 import Connect from 'components/Connect';
 import ConnectWallet from 'components/Connect/ConnectWallet';
 import { useAccount } from 'contexts/AccountContext';
 import { useModal } from 'hooks';
 import DepositModal from 'components/Modal/DepositModal';
+import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 
 const Banner = () => {
   const { selectedAccount } = useAccount();
+  const { lotteryNotInDrawingFreezeout } = useGlobalLotteryData();
   const { ModalWrapper, showModal, hideModal } = useModal();
-  const [drawHasEnded] = useState(false);
   const ButtonBlock = () => {
-    if (drawHasEnded) {
+    if (!lotteryNotInDrawingFreezeout) {
       return (
         <button className="bg-button-primary/20 border border-primary/50 text-secondary/80 px-[48px] h-[66px] font-title text-xl rounded-xl cursor-default">
-          Deposit for draw #4 has ended
+          Deposit for draw #1 has ended
         </button>
       );
     }

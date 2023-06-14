@@ -7,8 +7,10 @@ import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 
 const DataBoard = () => {
   const [totalPotIsSelected, setTotalPotIsSelected] = useState(true);
-  const { sumOfDeposits } = useGlobalLotteryData();
-  const totalAmount = totalPotIsSelected ? sumOfDeposits?.toString(0) : 99999;
+  const { sumOfDeposits, currentPrizePool } = useGlobalLotteryData();
+  const totalAmount = totalPotIsSelected
+    ? sumOfDeposits?.toString(0)
+    : currentPrizePool?.toString(2);
   const renderer = ({ days, hours, minutes, seconds }: any) => {
     return (
       <div className="flex">

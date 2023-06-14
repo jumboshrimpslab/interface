@@ -16,14 +16,14 @@ import { useAxios } from './AxiosContext';
 
 type GlobalLotteryDataContextValue = {
   sumOfDeposits: Balance | null;
-  totalDeposits: number | null;
   minDeposit: Balance | null;
   minWithdraw: Balance | null;
   currentPrizePool: Balance | null;
   nextDrawingBlockNumber: number | null;
-  drawingFreezoutIsActive: boolean | null;
   currentBlockNumber: number | null;
   isPrizeTabSelected: boolean;
+  lotteryNotInDrawingFreezeout: boolean;
+  unstakeLockTime: number | null;
   setIsPrizeTabSelected: (_: boolean) => void;
 };
 const GlobalLotteryDataContext =
@@ -39,7 +39,6 @@ const GlobalLotteryDataContextProvider = ({
 
   // deposits
   const [sumOfDeposits, setSumOfDeposits] = useState<Balance | null>(null);
-  const [totalDeposits, setTotalDeposits] = useState<number | null>(null);
   const [minDeposit, setMinDeposit] = useState<Balance | null>(null);
   const [minWithdraw, setMinWithdraw] = useState<Balance | null>(null);
 
@@ -52,12 +51,12 @@ const GlobalLotteryDataContextProvider = ({
   const [nextDrawingBlockNumber, setNextDrawingBlockNumber] = useState<
     number | null
   >(null);
-  const [drawingFreeoutBlocks, setDrawingFreeoutBlocks] = useState<
-    number | null
-  >(null);
   const [currentBlockNumber, setCurrentBlockNumber] = useState<number | null>(
     null
   );
+  const [lotteryNotInDrawingFreezeout, setLotteryNotInDrawingFreezeout] =
+    useState(true);
+  const [unstakeLockTime, setUnstakeLockTime] = useState<number | null>(null);
 
   // tabMenu
   const [isPrizeTabSelected, _setIsPrizeTabSelected] = useState<boolean>(
@@ -69,20 +68,67 @@ const GlobalLotteryDataContextProvider = ({
     store.set('isPrizeTabSelected', selected);
   }, []);
 
-  const drawingFreezoutIsActive = useMemo(() => {
-    if (
-      !drawingFreeoutBlocks ||
-      !nextDrawingBlockNumber ||
-      !currentBlockNumber
-    ) {
-      return null;
-    }
-    return currentBlockNumber >= nextDrawingBlockNumber - drawingFreeoutBlocks;
-  }, [drawingFreeoutBlocks, nextDrawingBlockNumber, currentBlockNumber]);
-
   useEffect(() => {
     const getCurrentPrizePool = async () => {
-      if (!axiosIsInit || !nextDrawingBlockNumber) {
+      if (!axiosIsInit) {
+        return;
+      }
+      try {
+        const response = await axios.post(
+          'https://crispy.baikal.testnet.calamari.systems',
+          {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'lottery_current_prize_pool',
+            params: []
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            }
+          }
+        );
+        setCurrentPrizePool(Balance.Native(new BN(response.data.result)));
+      } catch (error) {
+        console.error(error);
+        setCurrentPrizePool(null);
+      }
+    };
+    getCurrentPrizePool();
+  }, [axiosIsInit, currentBlockNumber]);
+
+  useEffect(() => {
+    const getLotteryDrawingStatus = async () => {
+      if (!axiosIsInit) {
+        return;
+      }
+      try {
+        const response = await axios.post(
+          'https://crispy.baikal.testnet.calamari.systems',
+          {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'lottery_not_in_drawing_freezeout',
+            params: []
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            }
+          }
+        );
+        setLotteryNotInDrawingFreezeout(response.data.result);
+      } catch (error) {
+        console.error(error);
+        setLotteryNotInDrawingFreezeout(true);
+      }
+    };
+    getLotteryDrawingStatus();
+  }, [axiosIsInit, currentBlockNumber]);
+
+  useEffect(() => {
+    const nextDrawingBlockNumber = async () => {
+      if (!axiosIsInit) {
         return;
       }
       try {
@@ -100,14 +146,13 @@ const GlobalLotteryDataContextProvider = ({
             }
           }
         );
-        setCurrentPrizePool(Balance.Native(new BN(response.data.result)));
+        setNextDrawingBlockNumber(response.data.result);
       } catch (error) {
         console.error(error);
-        setCurrentPrizePool(null);
       }
     };
-    getCurrentPrizePool();
-  }, [axiosIsInit, currentBlockNumber, nextDrawingBlockNumber]);
+    nextDrawingBlockNumber();
+  }, [axiosIsInit, currentBlockNumber]);
 
   useEffect(() => {
     const handleUpdateMinDeposit = (minDeposit: any) => {
@@ -140,38 +185,6 @@ const GlobalLotteryDataContextProvider = ({
     };
     let unsub: any;
     subscribeMinWithdraw();
-    return unsub && unsub();
-  }, [api, apiState]);
-
-  useEffect(() => {
-    const getDrawingFreezoutBlocks = async () => {
-      if (!api || apiState !== 'READY') {
-        return;
-      }
-      await api.isReady;
-      const blocks = (api.consts.lottery.drawingFreezeout as any).toNumber();
-      setDrawingFreeoutBlocks(blocks);
-    };
-    getDrawingFreezoutBlocks();
-  }, [api, apiState]);
-
-  // todo: possibly replace with `lottery.nextDrawingAt`
-  useEffect(() => {
-    const handleChangeAgenda = (agenda: any) => {
-      // todo: filter other agenda items
-      const nextDrawingBlockNumber = agenda[0][0].args[0].toNumber();
-      setNextDrawingBlockNumber(nextDrawingBlockNumber);
-    };
-
-    const subscribeNextDrawingBlockNumber = async () => {
-      if (!api || apiState !== 'READY') {
-        return;
-      }
-      await api.isReady;
-      unsub = await api.query.scheduler.agenda.entries(handleChangeAgenda);
-    };
-    let unsub: any;
-    subscribeNextDrawingBlockNumber();
     return unsub && unsub();
   }, [api, apiState]);
 
@@ -210,44 +223,42 @@ const GlobalLotteryDataContextProvider = ({
   }, [api, apiState]);
 
   useEffect(() => {
-    const subscribeTotalDeposits = async () => {
+    const getUnstakeLockTime = async () => {
       if (!api || apiState !== 'READY') {
         return;
       }
       await api.isReady;
-      unsub = await api.query.lottery.activeBalancePerUser.entries(
-        (deposits: any) => setTotalDeposits(deposits.length)
-      );
+      const UNSTAKE_LOCK_TIME = (
+        api.consts.lottery.unstakeLockTime as any
+      ).toNumber();
+      setUnstakeLockTime(UNSTAKE_LOCK_TIME);
     };
-
-    let unsub: any;
-    subscribeTotalDeposits();
-    return unsub && unsub();
+    getUnstakeLockTime();
   }, [api, apiState]);
 
   const state = useMemo(
     () => ({
       sumOfDeposits,
-      totalDeposits,
       nextDrawingBlockNumber,
       currentBlockNumber,
-      drawingFreezoutIsActive,
       minDeposit,
       minWithdraw,
       currentPrizePool,
       isPrizeTabSelected,
+      lotteryNotInDrawingFreezeout,
+      unstakeLockTime,
       setIsPrizeTabSelected
     }),
     [
       sumOfDeposits,
-      totalDeposits,
       nextDrawingBlockNumber,
       currentBlockNumber,
-      drawingFreezoutIsActive,
       minDeposit,
       minWithdraw,
       currentPrizePool,
       isPrizeTabSelected,
+      lotteryNotInDrawingFreezeout,
+      unstakeLockTime,
       setIsPrizeTabSelected
     ]
   );

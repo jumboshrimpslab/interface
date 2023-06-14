@@ -8,19 +8,23 @@ import {
 } from 'react';
 import BN from 'bn.js';
 import { encodeAddress } from '@polkadot/util-crypto';
+import Decimal from 'decimal.js';
 import Balance from 'classes/Balance';
 import config from 'config';
+import calculateWinningChance from 'utils/display/calculateWinningChance';
 import { useSubstrate } from './SubstrateContext';
 import { useAccount } from './AccountContext';
+import { useGlobalLotteryData } from './GlobalLotteryDataContext';
 
 type UserLotteryDataContextValue = {
   userNonStakedBalance: Balance | null;
   userUnclaimedWinnings: Balance | null;
   userPendingWithdrawals: PendingWithdrawal[] | null;
   userLotteryActiveBalance: Balance | null;
+  userWinningChance: string;
 };
 
-type PendingWithdrawal = {
+export type PendingWithdrawal = {
   balance: Balance;
   blockNumber: number;
 };
@@ -35,6 +39,7 @@ const UserLotteryDataContextProvider = ({
 }) => {
   const { api, apiState } = useSubstrate();
   const { selectedAccount } = useAccount();
+  const { sumOfDeposits } = useGlobalLotteryData();
 
   const [userNonStakedBalance, setUserNonStakedBalance] =
     useState<Balance | null>(null);
@@ -45,10 +50,27 @@ const UserLotteryDataContextProvider = ({
   const [userPendingWithdrawals, setUserPendingWithdrawals] = useState<
     PendingWithdrawal[] | null
   >(null);
+  const [userWinningChance, setUserWinningChance] = useState('');
+
+  useEffect(() => {
+    if (sumOfDeposits === null || userLotteryActiveBalance === null) {
+      return;
+    }
+    if (userLotteryActiveBalance.isZero()) {
+      setUserWinningChance('0');
+    } else {
+      const userWinningChance = calculateWinningChance(
+        new Decimal(userLotteryActiveBalance?.toString()),
+        new Decimal(sumOfDeposits?.toString())
+      );
+      setUserWinningChance(userWinningChance);
+    }
+  }, [sumOfDeposits, userLotteryActiveBalance]);
 
   useEffect(() => {
     const handleUpdatePendingWithdrawals = (pendingWithdrawalsRaw: any) => {
       if (pendingWithdrawalsRaw.isEmpty) {
+        setUserPendingWithdrawals([]);
         return;
       }
       const userPendingWithdrawalsRaw = pendingWithdrawalsRaw.filter(
@@ -113,6 +135,8 @@ const UserLotteryDataContextProvider = ({
         setUserUnclaimedWinnings(
           Balance.Native(new BN(unclaimedWinnings.unwrap().toString()))
         );
+      } else {
+        setUserUnclaimedWinnings(null);
       }
     };
     const subscribeUserUnclaimedWinings = async () => {
@@ -154,40 +178,20 @@ const UserLotteryDataContextProvider = ({
     return unsub && unsub();
   }, [api, apiState, selectedAccount]);
 
-  useEffect(() => {
-    const handleChangeUnclaimedWinnings = (unclaimedWinnings: any) => {
-      if (unclaimedWinnings.isSome) {
-        return;
-      }
-    };
-
-    const subscribeUserUnclaimedWinings = async () => {
-      if (!api || !selectedAccount || apiState !== 'READY') {
-        return;
-      }
-      await api.isReady;
-      unsub = await api.query.lottery.unclaimedWinningsByAccount(
-        selectedAccount.address,
-        handleChangeUnclaimedWinnings
-      );
-    };
-    let unsub: any;
-    subscribeUserUnclaimedWinings();
-    return unsub && unsub();
-  }, [api, apiState, selectedAccount]);
-
   const state = useMemo(
     () => ({
       userNonStakedBalance,
       userUnclaimedWinnings,
       userPendingWithdrawals,
-      userLotteryActiveBalance
+      userLotteryActiveBalance,
+      userWinningChance
     }),
     [
       userNonStakedBalance,
       userUnclaimedWinnings,
       userPendingWithdrawals,
-      userLotteryActiveBalance
+      userLotteryActiveBalance,
+      userWinningChance
     ]
   );
 

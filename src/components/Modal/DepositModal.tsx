@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InputNumber } from 'primereact/inputnumber';
 import { Nullable } from 'primereact/ts-helpers';
 import BN from 'bn.js';
@@ -33,7 +33,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   const [validateErrMsg, setValidateErrMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [depositSuccess, setDepositSuccess] = useState(false);
-  const { userNonStakedBalance, userLotteryActiveBalance } =
+  const { userNonStakedBalance, userLotteryActiveBalance, userWinningChance } =
     useUserLotteryData();
   const {
     sumOfDeposits,
@@ -43,23 +43,24 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   } = useGlobalLotteryData();
   const { api, apiState } = useSubstrate();
   const { selectedAccount } = useAccount();
-  const { withdrawTxFee } = useLotteryTx();
+  const { depositTxFee } = useLotteryTx();
 
   const [winningChance, setWinningChance] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [value, setValue] = useState<Nullable<number | null>>(null);
   const [transferErrMsg, setTransferErrMsg] = useState('');
+  const initialWinningChance = useRef(false);
 
-  const validateInputValue = (inputValue: number | null) => {
+  const validateInputValue = (inputValue: Nullable<number | null>) => {
     if (
       !inputValue ||
-      !sumOfDeposits ||
-      !minDeposit ||
-      !api ||
-      !withdrawTxFee
+      sumOfDeposits === null ||
+      userLotteryActiveBalance === null ||
+      !depositTxFee
     ) {
       validateErrMsg && setValidateErrMsg('');
       setIsButtonDisabled(true);
+      setWinningChance(userWinningChance);
       return;
     }
     const inputBalanceValue = Balance.fromBaseUnits(
@@ -70,7 +71,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
       AssetType.Native(),
       AssetType.Native().existentialDeposit
     );
-    const reservedBalance = existentialDeposit.add(withdrawTxFee);
+    const reservedBalance = existentialDeposit.add(depositTxFee);
     if (
       userNonStakedBalance !== null &&
       inputBalanceValue.gt(userNonStakedBalance.sub(reservedBalance))
@@ -86,12 +87,13 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
     }
 
     const newWinningChance = calculateWinningChance(
-      new Decimal(inputValue).plus(userLotteryActiveBalance?.toString() || 0),
-      new Decimal(sumOfDeposits?.toString())
+      new Decimal(inputValue).plus(userLotteryActiveBalance?.toString()),
+      new Decimal(inputValue).plus(sumOfDeposits?.toString())
     );
 
     setWinningChance(newWinningChance);
   };
+
   const handleInputChange = (e: InputNumberChangeEvent) => {
     const inputValue = e.value;
     validateInputValue(inputValue);
@@ -99,28 +101,23 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
 
   const handleTxRes = (tx: any) => {
     const status = tx.status;
-    const events = tx.events;
+    const dispatchError = tx.dispatchError;
     console.log('Transaction status:', status.type);
     if (status.isFinalized) {
       console.log('Finalized block hash', status.asFinalized.toHex());
-      events.forEach(({ event }: any) => {
-        const { data } = event;
-        if (api?.events.system.ExtrinsicFailed.is(event)) {
-          const error = data[0];
-          if (error.isModule) {
-            const decoded = api.registry.findMetaError(
-              error.asModule.toU8a() as any
-            );
-            const { docs, method, section } = decoded;
-            const errorMsg = `${section}.${method}: ${docs.join(' ')}`;
-            setTransferErrMsg(errorMsg);
-          } else {
-            setTransferErrMsg(error.toString());
-          }
-        } else if (api?.events.system.ExtrinsicSuccess.is(event)) {
-          setDepositSuccess(true);
+      if (dispatchError) {
+        if (dispatchError.isModule) {
+          const decoded = api?.registry.findMetaError(
+            dispatchError.asModule
+          ) as any;
+          const errorMsg = `${decoded.section}.${decoded.name}`;
+          setTransferErrMsg(errorMsg);
+        } else {
+          setTransferErrMsg(dispatchError.toString());
         }
-      });
+      } else {
+        setDepositSuccess(true);
+      }
       setIsButtonDisabled(false);
       setSubmitting(false);
     }
@@ -136,7 +133,9 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
 
     try {
       await api.tx.lottery
-        .deposit(new BN(value).mul(new BN(10).pow(new BN(decimals))).toString())
+        .deposit(
+          new Decimal(value).mul(new Decimal(10).pow(decimals)).toString()
+        )
         .signAndSend(
           selectedAccount.address,
           { signer: selectedAccount.meta.signer as Signer },
@@ -155,9 +154,18 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   };
 
   const setMaxValue = () => {
-    if (userNonStakedBalance?.gt(Balance.Native(new BN(0)))) {
-      setValue(+userNonStakedBalance?.toString(2));
-      validateInputValue(+userNonStakedBalance?.toString(2));
+    if (
+      depositTxFee !== null &&
+      userNonStakedBalance?.gt(Balance.Native(new BN(0)))
+    ) {
+      const existentialDeposit = new Balance(
+        AssetType.Native(),
+        AssetType.Native().existentialDeposit
+      );
+      const reservedBalance = existentialDeposit.add(depositTxFee);
+      const max = userNonStakedBalance.sub(reservedBalance);
+      setValue(+max?.toString(2));
+      validateInputValue(+max?.toString(2));
     } else {
       setValue(0);
       validateInputValue(0);
@@ -165,19 +173,11 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   };
 
   useEffect(() => {
-    if (sumOfDeposits === null || userLotteryActiveBalance === null) {
-      return;
-    }
-    if (userLotteryActiveBalance.isZero()) {
-      setWinningChance('0');
-    } else {
-      const userWinningChance = calculateWinningChance(
-        new Decimal(userLotteryActiveBalance?.toString()),
-        new Decimal(sumOfDeposits?.toString())
-      );
+    if (userWinningChance !== '' && !initialWinningChance.current) {
       setWinningChance(userWinningChance);
+      initialWinningChance.current = true;
     }
-  }, [sumOfDeposits, userLotteryActiveBalance]);
+  }, [userWinningChance]);
 
   const DepositSuccess = () => {
     return (
