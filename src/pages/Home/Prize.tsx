@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import BN from 'bn.js';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import classNames from 'classnames';
 import store from 'store';
 import { useUserLotteryData } from 'contexts/UserLotteryDataContext';
 import Balance from 'classes/Balance';
 import PrizeBG from 'resources/images/prize-bg.png';
 import { useSubstrate } from 'contexts/SubstrateContext';
-import { useAccount } from 'contexts/AccountContext';
 import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
+import { useWallet } from 'contexts/WalletContext';
+import Hourglass from 'resources/images/hourglass.png';
 import type { Signer } from '@polkadot/api/types';
 
 const Prize = () => {
@@ -18,7 +18,7 @@ const Prize = () => {
   const [submitting, setSubmitting] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const { api, apiState } = useSubstrate();
-  const { selectedAccount } = useAccount();
+  const { selectedAccount } = useWallet();
   const [showCheckPrizeButton, setShowCheckPrizeButton] = useState(false);
 
   const handleTxRes = (tx: any) => {
@@ -59,7 +59,7 @@ const Prize = () => {
         .claimMyWinnings()
         .signAndSend(
           selectedAccount?.address,
-          { signer: selectedAccount?.meta.signer as Signer },
+          { signer: selectedAccount?.signer as Signer },
           handleTxRes
         );
     } catch (e: any) {
@@ -75,16 +75,24 @@ const Prize = () => {
   };
 
   useEffect(() => {
-    if (userUnclaimedWinnings === null) {
+    if (userUnclaimedWinnings === null || currentBlockNumber === null) {
       setHasWinning(false);
       return;
     }
     if (userUnclaimedWinnings.gt(Balance.Native(new BN(0)))) {
-      setHasWinning(true);
+      const nextDrawingBlockNumberAfterChecked = store.get(
+        'nextDrawingBlockNumberAfterChecked'
+      );
+      if (
+        !nextDrawingBlockNumberAfterChecked ||
+        currentBlockNumber >= nextDrawingBlockNumberAfterChecked
+      ) {
+        setHasWinning(true);
+      }
     } else {
       setHasWinning(false);
     }
-  }, [userUnclaimedWinnings]);
+  }, [userUnclaimedWinnings, currentBlockNumber]);
 
   useEffect(() => {
     if (!currentBlockNumber) {
@@ -111,12 +119,12 @@ const Prize = () => {
         </button>
       );
     } else {
-      // 3 button types: 'Check Prize' or 'Claim Prize' or 'No Draws to Check'
+      // 3 button types: 'Check Prize' or 'Claim Prize' or 'No Prize to Claim'
       if (showCheckPrizeButton) {
         return (
           <button
             onClick={handleCheck}
-            className="bg-button-primary font-title w-[280px] rounded-xl h-[66px] text-xl text-white flex items-center justify-center gap-4"
+            className="btn-primary font-title w-[280px] rounded-xl h-[66px] text-xl flex items-center justify-center gap-4"
           >
             Check Prize
           </button>
@@ -126,14 +134,7 @@ const Prize = () => {
           <button
             onClick={handleClaim}
             disabled={isButtonDisabled}
-            className={classNames(
-              'font-title w-[280px] rounded-xl h-[66px] text-xl text-white flex items-center justify-center gap-4',
-              {
-                'bg-button-primary': !isButtonDisabled,
-                'border border-primary/50 bg-button-primary/70 cursor-not-allowed':
-                  isButtonDisabled
-              }
-            )}
+            className="btn-primary font-title w-[280px] rounded-xl h-[66px] text-xl text-white flex items-center justify-center gap-4"
           >
             {submitting ? 'Claiming' : 'Claim Prize'}
             {submitting && (
@@ -147,7 +148,7 @@ const Prize = () => {
       } else {
         return (
           <button className="w-[280px] h-[66px] rounded-xl text-xl font-title border border-white/50 bg-white/20 text-white/80 cursor-not-allowed">
-            No Draws to Check
+            No Prize to Claim
           </button>
         );
       }
@@ -162,8 +163,16 @@ const Prize = () => {
 
   return (
     <div>
-      <div className="h-[202px] bg-gradient-to-r from-[#FF6B00] to-[#FFCE51] rounded-3xl flex items-center justify-between px-12 text-tertiary">
-        <div>
+      <div className="h-[202px] bg-gradient-to-r from-[#FF6B00] to-[#FFCE51] rounded-3xl flex items-center justify-between px-12 text-tertiary relative">
+        <img
+          src={Hourglass}
+          width={'264'}
+          height={'264'}
+          alt="hourglass"
+          className="absolute -left-[40px]"
+        />
+
+        <div className="pl-[155px]">
           <div className="font-content text-2xl leading-[30px] font-extrabold mb-2">
             Coming Soon
           </div>
@@ -185,7 +194,7 @@ const Prize = () => {
         )}
         <ButtonBlock />
       </div>
-      <div>
+      {/* <div>
         <div className="font-title text-xl leading-[34px] mt-6 mb-4">
           Prize History
         </div>
@@ -206,7 +215,7 @@ const Prize = () => {
         <div className="bg-primary h-[30px] leading-[30px] font-content mt-2 text-base">
           No prize history yet
         </div>
-        {/* <div className="font-content text-base flex gap-5 mt-2">
+        <div className="font-content text-base flex gap-5 mt-2">
           <span className="bg-primary h-[30px] flex-1 rounded-[6px] flex items-center justify-center gap-4">
             Draw #3
           </span>
@@ -219,8 +228,8 @@ const Prize = () => {
           <span className="bg-primary h-[30px] leading-[30px] flex-1 rounded-[6px]">
             10000 MANTA
           </span>
-        </div> */}
-      </div>
+        </div>
+      </div> */}
     </div>
   );
 };

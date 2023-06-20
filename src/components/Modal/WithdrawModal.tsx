@@ -3,17 +3,17 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Nullable } from 'primereact/ts-helpers';
 import BN from 'bn.js';
 import Decimal from 'decimal.js';
-import classNames from 'classnames';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import Icon from 'components/Icon';
 import Ring from 'resources/images/deposit-success.png';
 import { useUserLotteryData } from 'contexts/UserLotteryDataContext';
 import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
 import { useSubstrate } from 'contexts/SubstrateContext';
-import { useAccount } from 'contexts/AccountContext';
 import Balance from 'classes/Balance';
 import AssetType from 'classes/AssetType';
 import calculateWinningChance from 'utils/display/calculateWinningChance';
+import { useWallet } from 'contexts/WalletContext';
+import { useLotteryTx } from 'contexts/LotteryTxContext';
 import type { Signer } from '@polkadot/api/types';
 
 const decimals = AssetType.Native().numberOfDecimals;
@@ -29,6 +29,35 @@ interface InputNumberChangeEvent {
   value: number | null;
 }
 
+const WithdrawSuccess = ({ hideModal }: { hideModal: () => void }) => {
+  return (
+    <>
+      <h1 className="text-2xl leading-10 text-secondary font-title">
+        Withdraw Submitted!
+      </h1>
+      <div className="font-content mt-4">
+        <div className="h-[160px] flex items-center justify-between mb-6 leading-5">
+          <div>
+            <div>
+              Your withdraw needs to wait X days to be liquid. <br />
+              We will send it back to your account.
+            </div>
+            <br />
+            <div>Don&apos;t forget to check it!</div>
+          </div>
+          <img src={Ring} alt="deposit success" width="160" height="160" />
+        </div>
+        <button
+          onClick={hideModal}
+          className="font-title btn-primary w-full rounded-xl h-[66px]"
+        >
+          OK
+        </button>
+      </div>
+    </>
+  );
+};
+
 const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -40,8 +69,9 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
 
   const { userLotteryActiveBalance, userWinningChance } = useUserLotteryData();
   const { sumOfDeposits, minWithdraw } = useGlobalLotteryData();
+  const { withdrawTxFee } = useLotteryTx();
   const { api, apiState } = useSubstrate();
-  const { selectedAccount } = useAccount();
+  const { selectedAccount } = useWallet();
   const [value, setValue] = useState<Nullable<number | null>>(null);
   const validateInputValue = (inputValue: Nullable<number | null>) => {
     if (
@@ -50,10 +80,13 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
       sumOfDeposits === null
     ) {
       validateErrMsg && setValidateErrMsg('');
+      transferErrMsg && setTransferErrMsg('');
       setIsButtonDisabled(true);
       setWinningChance(userWinningChance);
       return;
     }
+    transferErrMsg && setTransferErrMsg('');
+
     const inputBalanceValue = Balance.Native(
       new BN(inputValue).mul(new BN(10).pow(new BN(decimals)))
     );
@@ -125,7 +158,7 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
         )
         .signAndSend(
           selectedAccount.address,
-          { signer: selectedAccount.meta.signer as Signer },
+          { signer: selectedAccount.signer as Signer },
           handleTxRes
         );
     } catch (e: any) {
@@ -152,39 +185,10 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
     }
   }, [userWinningChance]);
 
-  const WithdrawSuccess = () => {
-    return (
-      <>
-        <h1 className="text-2xl leading-10 text-secondary font-title">
-          Withdraw Submitted!
-        </h1>
-        <div className="font-content mt-6">
-          <div className="h-[144px] flex items-center justify-between my-6 leading-5">
-            <div>
-              <div>
-                Your withdraw needs to wait X days to be liquid. <br />
-                We will send it back to your account.
-              </div>
-              <br />
-              <div>Don&apos;t forget to check it!</div>
-            </div>
-            <img src={Ring} alt="deposit success" width="135" height="144" />
-          </div>
-          <button
-            onClick={hideModal}
-            className="font-title bg-button-primary w-full text-white rounded-xl h-[66px]"
-          >
-            OK
-          </button>
-        </div>
-      </>
-    );
-  };
-
   return (
     <div className="w-[509px] text-left">
       {withdrawSuccess ? (
-        <WithdrawSuccess />
+        <WithdrawSuccess hideModal={hideModal} />
       ) : (
         <>
           <h1 className="text-2xl leading-10 text-secondary font-title">
@@ -216,21 +220,18 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between text-base leading-5 my-6">
+            <div className="flex items-center justify-between text-base leading-5 mt-6 mb-4">
               <span>Winning Chance</span>
               <span>{winningChance}</span>
+            </div>
+            <div className="flex items-center justify-between text-base leading-5 mb-6">
+              <span>Withdraw Gas Fee</span>
+              <span>{withdrawTxFee?.toString(2)} MANTA</span>
             </div>
             <button
               onClick={handleWithdraw}
               disabled={isButtonDisabled}
-              className={classNames(
-                'font-title w-full rounded-xl h-[66px] text-white flex items-center justify-center gap-4',
-                {
-                  'bg-button-primary': !isButtonDisabled,
-                  'border border-primary/50 bg-button-primary/70 cursor-not-allowed':
-                    isButtonDisabled
-                }
-              )}
+              className="btn-primary font-title w-full rounded-xl h-[66px] flex items-center justify-center gap-4"
             >
               {submitting ? 'Withdrawing' : 'Withdraw'}
               {submitting && (
@@ -240,9 +241,12 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
                 />
               )}
             </button>
-            <div className="text-center text-warning mt-2">
-              {transferErrMsg}
-            </div>
+            {transferErrMsg && (
+              <div className="text-left flex items-center text-warning gap-2 mt-[10px]">
+                <Icon name="information" />
+                {transferErrMsg}
+              </div>
+            )}
           </div>
         </>
       )}

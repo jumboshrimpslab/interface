@@ -1,19 +1,19 @@
 import BannerImage from 'resources/images/banner.png';
 import Connect from 'components/Connect';
 import ConnectWallet from 'components/Connect/ConnectWallet';
-import { useAccount } from 'contexts/AccountContext';
 import { useModal } from 'hooks';
 import DepositModal from 'components/Modal/DepositModal';
 import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
+import { useWallet } from 'contexts/WalletContext';
 
 const ButtonBlock = () => {
-  const { selectedAccount } = useAccount();
+  const { selectedAccount } = useWallet();
   const { lotteryNotInDrawingFreezeout } = useGlobalLotteryData();
   const { ModalWrapper, showModal, hideModal } = useModal();
   if (!lotteryNotInDrawingFreezeout) {
     return (
-      <button className="bg-button-primary/20 border border-primary/50 text-secondary/80 px-[48px] h-[66px] font-title text-xl rounded-xl cursor-default">
-        Deposit for draw #1 has ended
+      <button className="bg-button-primary/20 text-white/50 px-[48px] h-[66px] font-title text-xl rounded-xl cursor-default">
+        Deposit for Draw #1 has Closed for Winner Selection Underway
       </button>
     );
   }
@@ -22,7 +22,7 @@ const ButtonBlock = () => {
       <>
         <button
           onClick={showModal}
-          className="bg-button-primary w-[280px] h-[66px] font-title text-xl rounded-xl"
+          className="btn-primary w-[280px] h-[66px] font-title text-xl rounded-xl"
         >
           Deposit Now
         </button>

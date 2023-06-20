@@ -142,10 +142,10 @@ const DataBoard = () => {
           </div>
         </div>
         <img
-          className="absolute top-12 -left-[71px]"
+          className="absolute top-[32px] -left-[88px]"
           src={Calculator}
-          width="171"
-          height="161"
+          width="180"
+          height="180"
           alt="calculator"
         />
       </div>
@@ -166,10 +166,10 @@ const DataBoard = () => {
           )}
         </div>
         <img
-          className="absolute top-[31px] -right-[58px]"
+          className="absolute top-[32px] -right-[96px]"
           src={Clock}
-          width="116"
-          height="128"
+          width="180"
+          height="180"
           alt="clock"
         />
       </div>

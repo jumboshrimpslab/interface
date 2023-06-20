@@ -1,18 +1,17 @@
 import classNames from 'classnames';
 import { setLastAccessedWallet } from 'utils/persistence/lastAccessedWallet';
 import getSubstrateWallets from 'utils/getSubstrateWallets';
-import { useKeyring } from 'contexts/KeyringContext';
+import { useWallet } from 'contexts/WalletContext';
 import type { Wallet } from 'manta-extension-connect';
 
 const SubstrateWallets = () => {
-  const { refreshWalletAccounts, selectedWallet, authedWalletList } =
-    useKeyring();
+  const { selectedWallet, authedWalletList, setSelectedWallet } = useWallet();
   const substrateWallets = getSubstrateWallets();
   const enabledExtentions = substrateWallets.filter(wallet =>
     authedWalletList.includes(wallet.extensionName)
   );
   const onClickWalletIconHandler = (wallet: Wallet) => async () => {
-    await refreshWalletAccounts(wallet);
+    setSelectedWallet(wallet);
     setLastAccessedWallet(wallet);
   };
 

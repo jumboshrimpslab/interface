@@ -2,8 +2,8 @@ import classNames from 'classnames';
 import { Identicon } from '@polkadot/react-identicon';
 import CopyPasteIcon from 'components/CopyPasteIcon';
 import getAbbreviatedName from 'utils/display/getAbbreviatedName';
-import { useAccount } from 'contexts/AccountContext';
 import Icon from 'components/Icon';
+import { useWallet } from 'contexts/WalletContext';
 
 const SingleAccountDisplay = ({
   accountName,
@@ -61,14 +61,14 @@ const SingleAccountDisplay = ({
 };
 
 const AccountSelectDropdown = () => {
-  const { selectedAccount, accountList, changeSelectedAccount } = useAccount();
+  const { selectedAccount, accountList, changeSelectedAccount } = useWallet();
 
   return (
     <div className="flex flex-col gap-5">
       {accountList.map(account => (
         <SingleAccountDisplay
           key={account.address}
-          accountName={(account as any).meta.name}
+          accountName={(account as any).name}
           accountAddress={account.address}
           isAccountSelected={account.address === selectedAccount?.address}
           onClickAccountHandler={() => changeSelectedAccount(account)}

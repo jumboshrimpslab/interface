@@ -1,6 +1,4 @@
-import classNames from 'classnames';
 import { useCallback, useEffect, useState } from 'react';
-import { useAccount } from 'contexts/AccountContext';
 import ConnectWallet from 'components/Connect/ConnectWallet';
 import Gift from 'resources/images/gift.png';
 import Medal from 'resources/images/medal.png';
@@ -14,9 +12,12 @@ import {
 } from 'contexts/UserLotteryDataContext';
 import Balance from 'classes/Balance';
 import { useGlobalLotteryData } from 'contexts/GlobalLotteryDataContext';
+import { useWallet } from 'contexts/WalletContext';
+import ConnectImage from 'resources/images/account-connect-wallet.png';
+import DepositSuccessImg from 'resources/images/deposit-success.png';
 
 const Account = () => {
-  const { selectedAccount } = useAccount();
+  const { selectedAccount } = useWallet();
   const {
     ModalWrapper: DepositModalWrapper,
     showModal: showDepositModal,
@@ -74,8 +75,9 @@ const Account = () => {
   const disabled = !lotteryNotInDrawingFreezeout;
   if (!selectedAccount) {
     return (
-      <div className="bg-primary h-[202px] rounded-3xl flex flex-col items-center justify-center text-white">
-        <div className="text-primary font-content mb-6 text-xl leading-[25px]">
+      <div className="bg-primary h-[370px] rounded-3xl flex flex-col items-center justify-center text-white">
+        <img src={ConnectImage} width="200" height="200" alt="connect image" />
+        <div className="text-primary font-content mt-4 mb-6 text-xl leading-[25px]">
           Connect wallet to view your balance
         </div>
         <ConnectWallet btnText="Connect Wallet" />
@@ -102,14 +104,7 @@ const Account = () => {
             <button
               disabled={disabled}
               onClick={showDepositModal}
-              className={classNames(
-                ' rounded-xl w-[235px] h-[66px] font-title text-xl',
-                {
-                  'bg-button-primary': !disabled,
-                  'border border-primary/50 bg-secondary/20 text-secondary/80 cursor-not-allowed':
-                    disabled
-                }
-              )}
+              className="btn-primary rounded-xl w-[235px] h-[66px] font-title text-xl"
             >
               Deposit
             </button>
@@ -119,14 +114,7 @@ const Account = () => {
             <button
               disabled={disabled}
               onClick={showWithdrawModal}
-              className={classNames(
-                ' rounded-xl w-[235px] h-[66px] font-title text-xl',
-                {
-                  'bg-white text-secondary': !disabled,
-                  'border border-white/50 bg-white/20 text-white/80 cursor-not-allowed':
-                    disabled
-                }
-              )}
+              className="btn-secondary rounded-xl w-[235px] h-[66px] font-title text-xl"
             >
               Withdraw
             </button>
@@ -143,7 +131,24 @@ const Account = () => {
           />
         </div>
         <div className="w-[590px] flex flex-col gap-5">
-          <div className="bg-primary h-[150px] rounded-3xl px-12 flex items-center justify-between">
+          <div className="bg-primary h-[320px] rounded-3xl pl-12 pr-8 flex items-start justify-between">
+            <div className="mt-[48px]">
+              <div className="text-2xl font-content font-extrabold text-left">
+                Winner Chance
+              </div>
+              <div className="font-title text-[40px] leading-[68px] pr-[61px] mt-2">
+                {userWinningChance}
+              </div>
+            </div>
+            <img
+              src={DepositSuccessImg}
+              className="mt-[35px]"
+              width="270"
+              height={'270'}
+              alt="icon"
+            />
+          </div>
+          {/* <div className="bg-primary h-[150px] rounded-3xl px-12 flex items-center justify-between">
             <div className="text-2xl font-content font-extrabold">
               Claimed
               <br />
@@ -172,7 +177,7 @@ const Account = () => {
               height={'124'}
               alt="gift icon"
             />
-          </div>
+          </div> */}
         </div>
       </div>
       <div>
@@ -199,7 +204,7 @@ const Account = () => {
             {userLotteryActiveBalance?.toString()}
           </span>
           <span className="bg-primary h-[48px] leading-[48px] flex-1 rounded-[6px]">
-            to be done
+            --
           </span>
         </div>
       </div>

@@ -1,9 +1,8 @@
 import Icon, { IconName } from 'components/Icon';
-import { useAccount } from 'contexts/AccountContext';
 import getErrMsgAfterRemovePathname from 'utils/display/getErrMsgAfterRemovePathname';
 import getWalletDisplayName from 'utils/display/getWalletDisplayName';
 import getSubstrateWallets from 'utils/getSubstrateWallets';
-import { useKeyring } from 'contexts/KeyringContext';
+import { useWallet } from 'contexts/WalletContext';
 import WALLET_NAME from 'constants/WalletConstants';
 
 type connectWalletBlock = {
@@ -25,7 +24,7 @@ const ConnectWalletBlock = ({
   isWalletEnabled,
   connectHandler
 }: connectWalletBlock) => {
-  const { walletConnectingErrorMessages } = useKeyring();
+  const { walletConnectingErrorMessages } = useWallet();
   const errorMessage = walletConnectingErrorMessages[extensionName];
 
   const getDisplayedErrorMessage = () => {
@@ -67,13 +66,13 @@ const ConnectWalletBlock = ({
       ) : isWalletInstalled ? (
         <button
           onClick={connectHandler}
-          className="rounded-xl bg-button-primary text-white text-base font-['Rammetto_One'] w-[117px] h-[52px]"
+          className="rounded-xl btn-primary text-base font-['Rammetto_One'] w-[117px] h-[52px]"
         >
           Connect
         </button>
       ) : (
         <a href={walletInstallLink} target="_blank" rel="noreferrer">
-          <div className="text-center rounded-xl bg-button-primary text-white text-base font-['Rammetto_One'] w-[117px] h-[52px] leading-[52px]">
+          <div className="text-center rounded-xl btn-primary text-base font-['Rammetto_One'] w-[117px] h-[52px] leading-[52px]">
             Install
           </div>
         </a>
@@ -94,8 +93,7 @@ export const SubstrateConnectWalletBlock = ({
 }: {
   hideModal: () => void;
 }) => {
-  const { connectWallet, authedWalletList } = useKeyring();
-  const { selectedAccount } = useAccount();
+  const { connectWallet, authedWalletList, selectedAccount } = useWallet();
 
   const substrateWallets = getSubstrateWallets();
   // display Manta Wallet as the first wallet
@@ -139,11 +137,11 @@ export const SubstrateConnectWalletBlock = ({
 const ConnectWalletModal = ({ hideModal }: { hideModal: () => void }) => {
   return (
     <div className="w-[509px]">
-      <h1 className="text-2xl leading-10 text-secondary font-['Rammetto_One']">
+      <h1 className="text-2xl leading-10 text-secondary font-['Rammetto_One'] text-left">
         Connect Wallet
       </h1>
       <SubstrateConnectWalletBlock hideModal={hideModal} />
-      <p className="text-primary text-base leading-5 mt-4">
+      <p className="text-primary text-left text-base leading-5 mt-4">
         Already installed? Try refreshing this page
       </p>
     </div>

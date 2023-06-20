@@ -5,6 +5,7 @@ import {
   Routes
 } from 'react-router-dom';
 import Home from 'pages/Home';
+import ReconnectingToast from 'components/ReconnectingToast';
 
 function AppRouter() {
   return (
@@ -13,6 +14,7 @@ function AppRouter() {
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <ReconnectingToast />
     </Router>
   );
 }

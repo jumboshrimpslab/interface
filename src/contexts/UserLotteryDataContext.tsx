@@ -13,8 +13,8 @@ import Balance from 'classes/Balance';
 import config from 'config';
 import calculateWinningChance from 'utils/display/calculateWinningChance';
 import { useSubstrate } from './SubstrateContext';
-import { useAccount } from './AccountContext';
 import { useGlobalLotteryData } from './GlobalLotteryDataContext';
+import { useWallet } from './WalletContext';
 
 type UserLotteryDataContextValue = {
   userNonStakedBalance: Balance | null;
@@ -38,7 +38,7 @@ const UserLotteryDataContextProvider = ({
   children: ReactNode;
 }) => {
   const { api, apiState } = useSubstrate();
-  const { selectedAccount } = useAccount();
+  const { selectedAccount } = useWallet();
   const { sumOfDeposits } = useGlobalLotteryData();
 
   const [userNonStakedBalance, setUserNonStakedBalance] =
@@ -79,7 +79,13 @@ const UserLotteryDataContextProvider = ({
             withdrawal.user,
             config.SS58_FORMAT.CALAMARI
           );
-          return withdrawalAddress === selectedAccount?.address;
+          return (
+            withdrawalAddress ===
+            encodeAddress(
+              selectedAccount?.address as any,
+              config.SS58_FORMAT.CALAMARI
+            )
+          );
         }
       );
       const newUserpendingWithdrawals = userPendingWithdrawalsRaw.map(

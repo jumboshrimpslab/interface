@@ -3,8 +3,7 @@ import { GlobalLotteryDataContextProvider } from 'contexts/GlobalLotteryDataCont
 import { LotteryTxContextProvider } from 'contexts/LotteryTxContext';
 import AppRouter from './AppRouter';
 import { SubstrateContextProvider } from './contexts/SubstrateContext';
-import { KeyringContextProvider } from './contexts/KeyringContext';
-import { AccountContextProvider } from './contexts/AccountContext';
+import { WalletContextProvider } from './contexts/WalletContext';
 import { UsdValueContextProvider } from './contexts/UsdValueContext';
 import { AxiosContextProvider } from './contexts/AxiosContext';
 
@@ -14,17 +13,15 @@ function App() {
       <AxiosContextProvider>
         <UsdValueContextProvider>
           <SubstrateContextProvider>
-            <KeyringContextProvider>
-              <AccountContextProvider>
-                <GlobalLotteryDataContextProvider>
-                  <UserLotteryDataContextProvider>
-                    <LotteryTxContextProvider>
-                      <AppRouter />
-                    </LotteryTxContextProvider>
-                  </UserLotteryDataContextProvider>
-                </GlobalLotteryDataContextProvider>
-              </AccountContextProvider>
-            </KeyringContextProvider>
+            <WalletContextProvider>
+              <GlobalLotteryDataContextProvider>
+                <UserLotteryDataContextProvider>
+                  <LotteryTxContextProvider>
+                    <AppRouter />
+                  </LotteryTxContextProvider>
+                </UserLotteryDataContextProvider>
+              </GlobalLotteryDataContextProvider>
+            </WalletContextProvider>
           </SubstrateContextProvider>
         </UsdValueContextProvider>
       </AxiosContextProvider>

@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .btn-primary {
+    @apply text-white bg-button-primary hover:bg-[#FC4C00] active:bg-[#B93700];
+  }
+  .btn-primary:disabled {
+    @apply bg-button-primary/50 text-white/50 cursor-not-allowed
+  }
+
+  .btn-secondary {
+    @apply text-secondary bg-white hover:bg-[#FFEEC3] active:bg-[#FFE5A1];
+  }
+  .btn-secondary:disabled {
+    @apply bg-white/50 text-secondary/50 cursor-not-allowed
+  }
+}
+
 input {
   all: unset;
 }
@@ -19,16 +35,16 @@ input[type=number]::-webkit-outer-spin-button {
 @keyframes p-progress-spinner-color {
   100%,
   0% {
-      stroke: #d62d20;
+      stroke: #FFDFBD;
   }
-  40% {
-      stroke: #0057e7;
+  50% {
+      stroke: #FFDFBD;
   }
-  66% {
-      stroke: #008744;
-  }
-  80%,
-  90% {
-      stroke: #fff;
-  }
+}
+
+.Toastify__toast-container--top-right {
+  width: auto;
+  padding: 0;
+  right: 120px;
+  top: 139px
 }

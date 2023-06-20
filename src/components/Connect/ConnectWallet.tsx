@@ -1,7 +1,8 @@
-import { useKeyring } from 'contexts/KeyringContext';
+import { useWallet } from 'contexts/WalletContext';
 import { useModal } from 'hooks';
 import ConnectWalletModal from 'components/Modal/connectWalletModal';
 import Icon from 'components/Icon';
+import { useSubstrate } from 'contexts/SubstrateContext';
 
 const ConnectWallet = ({
   isButton = true,
@@ -12,15 +13,21 @@ const ConnectWallet = ({
   buttonWithIcon?: boolean;
   btnText?: string;
 }) => {
-  const { resetWalletConnectingErrorMessages } = useKeyring();
+  const { resetWalletConnectingErrorMessages } = useWallet();
   const { ModalWrapper, showModal, hideModal } = useModal({
     closeCallback: () => resetWalletConnectingErrorMessages()
   });
 
+  const { apiState } = useSubstrate();
+  const disabled = apiState !== 'READY';
+
   const ButtonComponent = () => {
     if (isButton && buttonWithIcon) {
       return (
-        <button className="flex items-center justify-center gap-4 font-title w-[291px] h-[54px] rounded-xl bg-white text-xl text-secondary">
+        <button
+          disabled={disabled}
+          className="btn-secondary flex items-center justify-center gap-4 font-title w-[291px] h-[54px] rounded-xl text-xl"
+        >
           <Icon name="wallet" />
           {btnText}
         </button>
@@ -28,12 +35,19 @@ const ConnectWallet = ({
     }
     if (isButton) {
       return (
-        <button className="bg-button-primary w-[280px] h-[66px] font-title text-xl rounded-xl">
+        <button
+          disabled={disabled}
+          className="btn-primary w-[280px] h-[66px] font-title text-xl rounded-xl"
+        >
           {btnText}
         </button>
       );
     }
-    return <Icon name="plusCircle" className="cursor-pointer" />;
+    return (
+      <div className="text-secondary hover:text-[#FC4C00] active:text-[#B93700]">
+        <Icon name="plusCircle" className="cursor-pointer" />
+      </div>
+    );
   };
 
   return (

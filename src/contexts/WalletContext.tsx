@@ -6,9 +6,10 @@ import {
   useEffect,
   useMemo,
   useCallback,
-  useRef
+  useRef,
+  Dispatch,
+  SetStateAction
 } from 'react';
-import { keyring, Keyring } from '@polkadot/ui-keyring';
 import getSubstrateWallets from 'utils/getSubstrateWallets';
 import APP_NAME from 'constants/AppConstants';
 import WALLET_NAME from 'constants/WalletConstants';
@@ -17,28 +18,35 @@ import {
   setLastAccessedWallet
 } from 'utils/persistence/lastAccessedWallet';
 import {
+  getLastAccessedAccount,
+  setLastAccessedAccount
+} from 'utils/persistence/lastAccessedAccount';
+import {
   getAuthedWalletListStorage,
   setAuthedWalletListStorage
 } from 'utils/persistence/authedWalletList';
-import config from '../config';
 import { useSubstrate } from './SubstrateContext';
-import type { Wallet } from 'manta-extension-connect';
+import type { Wallet, WalletAccount } from 'manta-extension-connect';
 
-type KeyringContextValue = {
-  keyring: Keyring;
-  isKeyringInit: boolean;
-  keyringAddresses: string[];
+type WalletContextValue = {
+  // wallets
   selectedWallet: Wallet | null;
   walletConnectingErrorMessages: { [key: string]: string };
   authedWalletList: string[];
+  setSelectedWallet: Dispatch<SetStateAction<Wallet | null>>;
   resetWalletConnectingErrorMessages: () => void;
   connectWallet: (
     extensionName: string,
     saveToStorage?: boolean
   ) => Promise<boolean>;
-  refreshWalletAccounts: (wallet: Wallet) => Promise<void>;
+
+  // accounts
+  selectedAccount: WalletAccount | null;
+  accountList: WalletAccount[];
+  changeSelectedAccount: (account: WalletAccount) => Promise<void>;
 };
-const KeyringContext = createContext<KeyringContextValue | null>(null);
+
+const WalletContext = createContext<WalletContextValue | null>(null);
 
 const getInitialWalletConnectingErrorMessages = () => {
   const errorMessages: { [key: string]: string } = {};
@@ -48,15 +56,21 @@ const getInitialWalletConnectingErrorMessages = () => {
   return errorMessages;
 };
 
-const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
+const WalletContextProvider = ({ children }: { children: ReactNode }) => {
   const { apiState } = useSubstrate();
-  const [isKeyringInit, setIsKeyringInit] = useState(false);
-  const [keyringAddresses, setKeyringAddresses] = useState<string[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [authedWalletList, setAuthedWalletList] = useState<string[]>([]);
   const [walletConnectingErrorMessages, setWalletConnectingErrorMessages] =
     useState(getInitialWalletConnectingErrorMessages());
   const authedWalletInitialized = useRef(false);
+
+  // accounts
+  const [selectedAccount, setSelectedAccount] = useState<WalletAccount | null>(
+    null
+  );
+  const [accountList, setAccountList] = useState<WalletAccount[]>([]);
+
+  const [rerenderAccountList, setRerenderAccountList] = useState(false);
 
   const resetWalletConnectingErrorMessages = useCallback(() => {
     setWalletConnectingErrorMessages(getInitialWalletConnectingErrorMessages());
@@ -71,50 +85,12 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
     return copyWalletNameList;
   };
 
-  const refreshWalletAccounts = useCallback(
-    async (wallet: Wallet) => {
-      const currentKeyringAddresses = keyring
-        .getAccounts()
-        .map(account => account.address);
-      const originUpdatedAccounts = await wallet.getAccounts();
-      const updatedAccounts = originUpdatedAccounts.filter(a => {
-        // ethereum account address should be avoid in substrate (tailsman)
-        // @ts-ignore
-        return ['ecdsa', 'ed25519', 'sr25519'].includes(a.type);
-      });
-      const substrateAddresses: string[] = updatedAccounts.map(
-        account => account.address
-      );
-      currentKeyringAddresses.forEach(address => {
-        keyring.forgetAccount(address);
-      });
-
-      updatedAccounts.forEach(account => {
-        // loadInjected is a privated function, will caused eslint error
-        // @ts-ignore
-        keyring.loadInjected(account.address, { ...account }, account.type);
-      });
-
-      // to prevent re-render when keyringAddresses not change
-      const sameLength = keyringAddresses.length === substrateAddresses.length;
-      const keyringAddressesNotChanged =
-        sameLength &&
-        keyringAddresses.filter(addr => !substrateAddresses.includes(addr))
-          .length === 0;
-      if (!keyringAddressesNotChanged) {
-        setKeyringAddresses(substrateAddresses);
-      }
-      setSelectedWallet(wallet);
-    },
-    [keyringAddresses]
-  );
-
   const connectWallet = useCallback(
     async (extensionName: string, saveToStorage = true) => {
-      if (!isKeyringInit) {
+      if (apiState !== 'READY') {
         setWalletConnectingErrorMessages({
           ...walletConnectingErrorMessages,
-          ...{ [extensionName]: 'not init keyring yet' }
+          ...{ [extensionName]: 'api not ready, please wait a minute' }
         });
         return false;
       }
@@ -145,7 +121,7 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
         ) {
           await connectingWallet?.enable(APP_NAME);
         }
-        await refreshWalletAccounts(connectingWallet);
+        setSelectedWallet(connectingWallet);
         saveToStorage && setLastAccessedWallet(connectingWallet);
 
         if (authedWalletInitialized.current) {
@@ -166,12 +142,7 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
     },
-    [
-      authedWalletList,
-      walletConnectingErrorMessages,
-      isKeyringInit,
-      refreshWalletAccounts
-    ]
+    [authedWalletList, walletConnectingErrorMessages, apiState]
   );
 
   const connectWalletExtensions = async (extensionNames: string[]) => {
@@ -199,18 +170,6 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    function initKeyring() {
-      if (apiState === 'READY' && !isKeyringInit) {
-        // just template, will change in the future
-        // const isCalamari = window.location.pathname?.includes('calamari');
-        keyring.loadAll({ ss58Format: config.SS58_FORMAT.CALAMARI }, []);
-        setIsKeyringInit(true);
-      }
-    }
-    initKeyring();
-  }, [apiState, isKeyringInit]);
-
-  useEffect(() => {
     let unsub: any = null;
     async function subAccounts() {
       if (
@@ -219,18 +178,46 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
       ) {
         return;
       }
-      unsub = await selectedWallet.subscribeAccounts(() => {
-        refreshWalletAccounts(selectedWallet);
+      unsub = await selectedWallet.subscribeAccounts(async (accounts: any) => {
+        if (accounts.length === 0) {
+          // disconnect wallet
+          const prevAuthedWalletList = getAuthedWalletListStorage();
+          const _authedWalletList = [...prevAuthedWalletList];
+          const index = _authedWalletList.indexOf(selectedWallet.extensionName);
+          if (index > -1) {
+            _authedWalletList.splice(index, 1);
+            setAuthedWalletList(_authedWalletList);
+            setAuthedWalletListStorage(_authedWalletList);
+            const wallets = getSubstrateWallets();
+            if (_authedWalletList.length > 0) {
+              const defaultWallet = wallets.find(
+                wallet => wallet.extensionName === _authedWalletList[0]
+              );
+              if (defaultWallet) {
+                setSelectedWallet(defaultWallet);
+                setAuthedWalletList(_authedWalletList);
+                setAuthedWalletListStorage(_authedWalletList);
+                return;
+              }
+            }
+            setSelectedWallet(null);
+            setSelectedAccount(null);
+            setAuthedWalletList([]);
+            setAuthedWalletListStorage([]);
+          }
+        } else {
+          setRerenderAccountList(prev => !prev);
+        }
       });
     }
     subAccounts().catch(console.error);
-    return () => unsub && unsub();
+    return () => unsub?.();
   }, [selectedWallet]);
 
   useEffect(() => {
     async function connectWallets() {
       // use authedWalletInitialized.current to make sure only initilize authedWalletList once
-      if (!isKeyringInit || authedWalletInitialized.current) {
+      if (apiState !== 'READY' || authedWalletInitialized.current) {
         return;
       }
       const prevAuthedWalletList = getAuthedWalletListStorage();
@@ -240,37 +227,95 @@ const KeyringContextProvider = ({ children }: { children: ReactNode }) => {
       authedWalletInitialized.current = true;
     }
     connectWallets().catch(console.error);
-  }, [isKeyringInit]);
+  }, [apiState]);
+
+  // ensure selectedAccount is the first item of accountList
+  const orderAccountList = (
+    selectedAccount: WalletAccount,
+    newAccounts: WalletAccount[]
+  ) => {
+    const orderedNewAccounts = [];
+    orderedNewAccounts.push(selectedAccount);
+    newAccounts.forEach(account => {
+      if (account.address !== selectedAccount.address) {
+        orderedNewAccounts.push(account);
+      }
+    });
+    return orderedNewAccounts;
+  };
+
+  const updateAccountList = useCallback(
+    async (account: WalletAccount, newAccounts: WalletAccount[]) => {
+      setSelectedAccount(account);
+      setLastAccessedAccount(account);
+      setAccountList(orderAccountList(account, newAccounts));
+    },
+    []
+  );
+
+  const changeSelectedAccount = useCallback(
+    async (account: WalletAccount) => {
+      updateAccountList(account, accountList);
+    },
+    [updateAccountList, accountList]
+  );
+
+  useEffect(() => {
+    async function renderAccountList() {
+      if (!selectedWallet) {
+        return;
+      }
+      const accounts: WalletAccount[] = await selectedWallet.getAccounts();
+      // ethereum account address should be avoid in substrate (tailsman)
+      const substrateAccounts = accounts.filter((account: any) =>
+        ['ecdsa', 'ed25519', 'sr25519'].includes(account.type)
+      );
+      if (substrateAccounts.length === 0) {
+        console.error(`no accounts in ${selectedWallet.extensionName}`);
+        return;
+      }
+      // The user's default account is either their last accessed account,
+      // or, as a fallback, the first account in their wallet
+      const activeAccount =
+        getLastAccessedAccount(
+          substrateAccounts,
+          selectedWallet.extensionName
+        ) || substrateAccounts[0];
+      updateAccountList(activeAccount, substrateAccounts);
+    }
+    renderAccountList().catch(console.error);
+  }, [updateAccountList, rerenderAccountList]);
 
   const state = useMemo(
     () => ({
-      keyring,
-      isKeyringInit,
-      keyringAddresses,
       selectedWallet,
       authedWalletList,
       walletConnectingErrorMessages,
+      selectedAccount,
+      accountList,
+      changeSelectedAccount,
+      setSelectedWallet,
       resetWalletConnectingErrorMessages,
-      connectWallet,
-      refreshWalletAccounts
+      connectWallet
     }),
     [
-      isKeyringInit,
-      keyringAddresses,
       selectedWallet,
       authedWalletList,
       walletConnectingErrorMessages,
+      selectedAccount,
+      accountList,
+      changeSelectedAccount,
+      setSelectedWallet,
       resetWalletConnectingErrorMessages,
-      connectWallet,
-      refreshWalletAccounts
+      connectWallet
     ]
   );
 
   return (
-    <KeyringContext.Provider value={state}>{children}</KeyringContext.Provider>
+    <WalletContext.Provider value={state}>{children}</WalletContext.Provider>
   );
 };
 
-const useKeyring = () => useContext(KeyringContext) as KeyringContextValue;
+const useWallet = () => useContext(WalletContext) as WalletContextValue;
 
-export { KeyringContextProvider, useKeyring };
+export { WalletContextProvider, useWallet };

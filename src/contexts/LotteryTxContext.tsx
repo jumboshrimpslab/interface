@@ -8,17 +8,11 @@ import {
 } from 'react';
 import { BN } from 'bn.js';
 import Balance from 'classes/Balance';
-import AssetType from 'classes/AssetType';
 import { useSubstrate } from './SubstrateContext';
 import { useGlobalLotteryData } from './GlobalLotteryDataContext';
-import { useUserLotteryData } from './UserLotteryDataContext';
-import { useAccount } from './AccountContext';
+import { useWallet } from './WalletContext';
 
 type LotteryTxContextValue = {
-  depositTargetAmount: Balance | null;
-  setDepositTargetAmount: (amount: Balance | null) => void;
-  withdrawalTargetAmount: Balance | null;
-  setWithdrawalTargetAmount: (amount: Balance | null) => void;
   depositTxFee: Balance | null;
   withdrawTxFee: Balance | null;
 };
@@ -27,15 +21,8 @@ const LotteryTxContext = createContext<LotteryTxContextValue | null>(null);
 
 const LotteryTxContextProvider = ({ children }: { children: ReactNode }) => {
   const { api, apiState } = useSubstrate();
-  const { selectedAccount } = useAccount();
-  const { minDeposit, currentBlockNumber } = useGlobalLotteryData();
-  const { userNonStakedBalance } = useUserLotteryData();
-
-  // target amounts
-  const [depositTargetAmount, setDepositTargetAmount] =
-    useState<Balance | null>(null);
-  const [withdrawalTargetAmount, setWithdrawalTargetAmount] =
-    useState<Balance | null>(null);
+  const { selectedAccount } = useWallet();
+  const { currentBlockNumber } = useGlobalLotteryData();
 
   // fees
   const [depositTxFee, setDepositTxFee] = useState<Balance | null>(null);
@@ -43,10 +30,14 @@ const LotteryTxContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const getWithdrawTxFee = async () => {
-      if (!api || !apiState || !selectedAccount || !currentBlockNumber) {
+      if (
+        !api ||
+        apiState !== 'READY' ||
+        !selectedAccount ||
+        !currentBlockNumber
+      ) {
         return null;
       }
-      await api.isReady;
       const tx = api.tx.lottery.requestWithdraw(0);
       const paymentInfo = await tx.paymentInfo(
         selectedAccount?.address as string
@@ -55,14 +46,18 @@ const LotteryTxContextProvider = ({ children }: { children: ReactNode }) => {
       setWithdrawTxFee(fee);
     };
     getWithdrawTxFee();
-  }, [api, apiState, selectedAccount, currentBlockNumber, setWithdrawTxFee]);
+  }, [api, apiState, selectedAccount, currentBlockNumber]);
 
   useEffect(() => {
     const getDepositTxFee = async () => {
-      if (!api || !apiState || !selectedAccount) {
+      if (
+        !api ||
+        apiState !== 'READY' ||
+        !selectedAccount ||
+        !currentBlockNumber
+      ) {
         return null;
       }
-      await api.isReady;
       const tx = api.tx.lottery.deposit(0);
       const paymentInfo = await tx.paymentInfo(
         selectedAccount?.address as string
@@ -71,37 +66,14 @@ const LotteryTxContextProvider = ({ children }: { children: ReactNode }) => {
       setDepositTxFee(fee);
     };
     getDepositTxFee();
-  }, [api, apiState, selectedAccount, setDepositTxFee]);
-
-  const getUserMaxDepositAmount = useMemo(() => {
-    if (!userNonStakedBalance || !minDeposit || !api || !apiState) {
-      return null;
-    }
-    const existentialDeposit = Balance.Native(
-      AssetType.Native().existentialDeposit
-    );
-    return userNonStakedBalance.sub(existentialDeposit);
-  }, [userNonStakedBalance, minDeposit, api, apiState]);
+  }, [api, apiState, selectedAccount, currentBlockNumber]);
 
   const state = useMemo(
     () => ({
-      depositTargetAmount,
-      setDepositTargetAmount,
-      withdrawalTargetAmount,
-      setWithdrawalTargetAmount,
-      getUserMaxDepositAmount,
       depositTxFee,
       withdrawTxFee
     }),
-    [
-      depositTargetAmount,
-      setDepositTargetAmount,
-      withdrawalTargetAmount,
-      setWithdrawalTargetAmount,
-      getUserMaxDepositAmount,
-      depositTxFee,
-      withdrawTxFee
-    ]
+    [depositTxFee, withdrawTxFee]
   );
 
   return (

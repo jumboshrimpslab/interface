@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
-import { useKeyring } from 'contexts/KeyringContext';
-import { useAccount } from 'contexts/AccountContext';
+import { useWallet } from 'contexts/WalletContext';
 import ConnectWallet from './ConnectWallet';
 import WalletSelectIconBar from './WalletSelectIconBar';
 import AccountSelectDropdown from './AccountSelectDropdown';
 
 const DisplayAccountButton = () => {
-  const { selectedWallet } = useKeyring();
-  const { selectedAccount } = useAccount();
+  const { selectedWallet, selectedAccount } = useWallet();
   const [showAccountList, setShowAccountList] = useState(false);
 
   const succinctAccountName = (
-    (selectedAccount as any)?.meta.name.length > 9
-      ? `${(selectedAccount as any)?.meta.name.slice(0, 9)}...`
-      : selectedAccount?.meta.name
+    (selectedAccount as any)?.name.length > 9
+      ? `${(selectedAccount as any)?.name.slice(0, 9)}...`
+      : (selectedAccount as any)?.name
   ) as string;
 
   return (
@@ -42,7 +40,7 @@ const DisplayAccountButton = () => {
                 <ConnectWallet isButton={false} />
               </div>
             </div>
-            <div className="max-h-96 overflow-y-auto bg-white px-5 py-5 rounded-b-lg">
+            <div className="max-h-80 overflow-y-auto bg-white px-5 py-5 rounded-b-lg">
               <AccountSelectDropdown />
             </div>
           </div>

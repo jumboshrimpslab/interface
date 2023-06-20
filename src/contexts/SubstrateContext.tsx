@@ -7,14 +7,6 @@ import {
   useEffect
 } from 'react';
 import config from '../config';
-import types from '../config/types.json';
-import type {
-  DefinitionRpc,
-  DefinitionRpcSub,
-  RegistryTypes
-} from '@polkadot/types/types';
-
-type RPCType = Record<string, Record<string, DefinitionRpc | DefinitionRpcSub>>;
 
 export type API_STATE =
   | 'CONNECT_INIT'
@@ -26,8 +18,6 @@ export type API_STATE =
 
 export type SubstrateStateType = {
   socket: string | string[];
-  rpc: RPCType;
-  types: RegistryTypes;
   api: ApiPromise | null;
   apiError: Error | null;
   apiState: API_STATE;
@@ -35,8 +25,6 @@ export type SubstrateStateType = {
 
 const INIT_STATE: SubstrateStateType = {
   socket: '',
-  rpc: {},
-  types,
   api: null,
   apiError: null,
   apiState: null
@@ -75,14 +63,14 @@ const connect = (
   state: SubstrateStateType,
   dispatch: (action: SubstrateAction) => void
 ) => {
-  const { apiState, socket, rpc, types } = state;
+  const { apiState, socket } = state;
   // We only want this function to be performed once
   if (apiState) return;
 
   dispatch({ type: 'CONNECT_INIT' });
 
   const provider = new WsProvider(socket);
-  const _api = new ApiPromise({ provider, types, rpc });
+  const _api = new ApiPromise({ provider });
 
   // Set listeners for disconnection and reconnection event.
   _api.on('connected', () => {
@@ -110,8 +98,7 @@ const SubstrateContext = createContext<SubstrateStateType | null>(null);
 const SubstrateContextProvider = ({ children }: { children: ReactNode }) => {
   const initialState = {
     ...INIT_STATE,
-    socket: config.PROVIDER_SOCKET,
-    rpc: config.RPC
+    socket: config.PROVIDER_SOCKET
   };
   const [state, dispatch] = useReducer(reducer, initialState);
 
