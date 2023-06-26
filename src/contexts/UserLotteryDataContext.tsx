@@ -110,7 +110,7 @@ const UserLotteryDataContextProvider = ({
     };
     let unsub: any;
     subscribePendingWithdrawals();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState, selectedAccount]);
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const UserLotteryDataContextProvider = ({
     };
     let unsub: any;
     subscribeUserLotteryActiveBalance();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState, selectedAccount]);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ const UserLotteryDataContextProvider = ({
     };
     let unsub: any;
     subscribeUserUnclaimedWinings();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState, selectedAccount]);
 
   useEffect(() => {
@@ -181,7 +181,7 @@ const UserLotteryDataContextProvider = ({
     };
     let unsub: any;
     subscribeNonStakedBalanceChanges();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState, selectedAccount]);
 
   const state = useMemo(

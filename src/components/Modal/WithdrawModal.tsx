@@ -29,7 +29,14 @@ interface InputNumberChangeEvent {
   value: number | null;
 }
 
-const WithdrawSuccess = ({ hideModal }: { hideModal: () => void }) => {
+const WithdrawSuccess = ({
+  hideModal,
+  getRemainingTimeToBeLiquid
+}: {
+  hideModal: () => void;
+  getRemainingTimeToBeLiquid: (withdrawBlockNumber: number) => string;
+}) => {
+  const { currentBlockNumber } = useGlobalLotteryData();
   return (
     <>
       <h1 className="text-2xl leading-10 text-secondary font-title">
@@ -39,7 +46,10 @@ const WithdrawSuccess = ({ hideModal }: { hideModal: () => void }) => {
         <div className="h-[160px] flex items-center justify-between mb-6 leading-5">
           <div>
             <div>
-              Your withdraw needs to wait X days to be liquid. <br />
+              Your withdraw needs to wait{' '}
+              {currentBlockNumber &&
+                getRemainingTimeToBeLiquid(currentBlockNumber)}{' '}
+              to be liquid. <br />
               We will send it back to your account.
             </div>
             <br />
@@ -58,7 +68,13 @@ const WithdrawSuccess = ({ hideModal }: { hideModal: () => void }) => {
   );
 };
 
-const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
+const WithdrawModal = ({
+  hideModal,
+  getRemainingTimeToBeLiquid
+}: {
+  hideModal: () => void;
+  getRemainingTimeToBeLiquid: (withdrawBlockNumber: number) => string;
+}) => {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [validateErrMsg, setValidateErrMsg] = useState('');
@@ -116,28 +132,26 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
 
   const handleTxRes = (tx: any) => {
     const status = tx.status;
-    const events = tx.events;
+    const dispatchError = tx.dispatchError;
     console.log('Transaction status:', status.type);
     if (status.isFinalized) {
       console.log('Finalized block hash', status.asFinalized.toHex());
-      events.forEach(({ event }: any) => {
-        const { data } = event;
-        if (api?.events.system.ExtrinsicFailed.is(event)) {
-          const error = data[0];
-          if (error.isModule) {
-            const decoded = api.registry.findMetaError(
-              error.asModule.toU8a() as any
-            );
-            const { docs, method, section } = decoded;
-            const errorMsg = `${section}.${method}: ${docs.join(' ')}`;
-            setTransferErrMsg(errorMsg);
-          } else {
-            setTransferErrMsg(error.toString());
+      if (dispatchError) {
+        if (dispatchError.isModule) {
+          const decoded = api?.registry.findMetaError(
+            dispatchError.asModule
+          ) as any;
+          let errorMsg = `${decoded.section}.${decoded.name}`;
+          if (decoded.name === 'TooCloseToDrawing') {
+            errorMsg = 'Withdraw has closed for winner selection underway.';
           }
-        } else if (api?.events.system.ExtrinsicSuccess.is(event)) {
-          setWithdrawSuccess(true);
+          setTransferErrMsg(errorMsg);
+        } else {
+          setTransferErrMsg(dispatchError.toString());
         }
-      });
+      } else {
+        setWithdrawSuccess(true);
+      }
       setIsButtonDisabled(false);
       setSubmitting(false);
     }
@@ -188,7 +202,10 @@ const WithdrawModal = ({ hideModal }: { hideModal: () => void }) => {
   return (
     <div className="w-[509px] text-left">
       {withdrawSuccess ? (
-        <WithdrawSuccess hideModal={hideModal} />
+        <WithdrawSuccess
+          hideModal={hideModal}
+          getRemainingTimeToBeLiquid={getRemainingTimeToBeLiquid}
+        />
       ) : (
         <>
           <h1 className="text-2xl leading-10 text-secondary font-title">

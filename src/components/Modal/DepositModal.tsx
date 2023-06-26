@@ -36,13 +36,7 @@ const DepositSuccess = ({
   return (
     <div className="font-content mt-4">
       <div className="h-[160px] flex items-center justify-between mb-6 leading-5">
-        <div>
-          <div>Your deposit is eligible for all future draws!</div>
-          <br />
-          <div>
-            Any prizes that are unclaimed <br /> after 60 days will expire.
-          </div>
-        </div>
+        <div>Your deposit is eligible for all future draws!</div>
         <img src={Ring} alt="deposit success" width="160" height="160" />
       </div>
       <button
@@ -139,7 +133,10 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
           const decoded = api?.registry.findMetaError(
             dispatchError.asModule
           ) as any;
-          const errorMsg = `${decoded.section}.${decoded.name}`;
+          let errorMsg = `${decoded.section}.${decoded.name}`;
+          if (decoded.name === 'TooCloseToDrawing') {
+            errorMsg = 'Withdraw has closed for winner selection underway.';
+          }
           setTransferErrMsg(errorMsg);
         } else {
           setTransferErrMsg(dispatchError.toString());

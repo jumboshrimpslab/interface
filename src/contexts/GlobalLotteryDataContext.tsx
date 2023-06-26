@@ -165,11 +165,11 @@ const GlobalLotteryDataContextProvider = ({
         return;
       }
       await api.isReady;
-      unsub = api.query.lottery.minDeposit(handleUpdateMinDeposit);
+      unsub = await api.query.lottery.minDeposit(handleUpdateMinDeposit);
     };
     let unsub: any;
     subscribeMinDeposit();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState]);
 
   useEffect(() => {
@@ -182,11 +182,11 @@ const GlobalLotteryDataContextProvider = ({
         return;
       }
       await api.isReady;
-      unsub = api.query.lottery.minWithdraw(handleUpdateMinWithdraw);
+      unsub = await api.query.lottery.minWithdraw(handleUpdateMinWithdraw);
     };
     let unsub: any;
     subscribeMinWithdraw();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState]);
 
   useEffect(() => {
@@ -195,13 +195,13 @@ const GlobalLotteryDataContextProvider = ({
         return;
       }
       await api.isReady;
-      api.rpc.chain.subscribeNewHeads((header: any) => {
+      unsub = await api.rpc.chain.subscribeNewHeads((header: any) => {
         setCurrentBlockNumber(header.number.toNumber());
       });
     };
     let unsub: any;
     subscribeCurrentBlockNumber();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState]);
 
   useEffect(() => {
@@ -220,7 +220,7 @@ const GlobalLotteryDataContextProvider = ({
 
     let unsub: any;
     subscribeSumOfDeposits();
-    return unsub && unsub();
+    return () => unsub && unsub();
   }, [api, apiState]);
 
   useEffect(() => {

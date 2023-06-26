@@ -47,7 +47,7 @@ const Account = () => {
   const getRemainingTimeToBeLiquid = useCallback(
     (withdrawBlockNumber: number) => {
       if (!unstakeLockTime || !nextDrawingBlockNumber || !currentBlockNumber) {
-        return;
+        return '--';
       }
       let totalRemainingBlocks;
       if (nextDrawingBlockNumber - withdrawBlockNumber <= unstakeLockTime) {
@@ -57,7 +57,7 @@ const Account = () => {
         totalRemainingBlocks = nextDrawingBlockNumber - currentBlockNumber;
       }
       // for now, use minutes, will be updated before production
-      return (totalRemainingBlocks * 12) / 60;
+      return (totalRemainingBlocks * 12) / 60 + 'min';
     },
     [currentBlockNumber, nextDrawingBlockNumber, unstakeLockTime]
   );
@@ -119,7 +119,10 @@ const Account = () => {
               Withdraw
             </button>
             <WithdrawModalWrapper>
-              <WithdrawModal hideModal={hideWithdrawModal} />
+              <WithdrawModal
+                hideModal={hideWithdrawModal}
+                getRemainingTimeToBeLiquid={getRemainingTimeToBeLiquid}
+              />
             </WithdrawModalWrapper>
           </div>
           <img
@@ -235,7 +238,7 @@ const Account = () => {
               {withdraw.balance.toString()}
             </span>
             <span className="bg-primary h-[30px] leading-[30px] flex-1 rounded-[6px]">
-              {getRemainingTimeToBeLiquid(withdraw.blockNumber)} min
+              {getRemainingTimeToBeLiquid(withdraw.blockNumber)}
             </span>
           </div>
         ))}
