@@ -75,24 +75,21 @@ const Prize = () => {
   };
 
   useEffect(() => {
-    if (userUnclaimedWinnings === null || currentBlockNumber === null) {
+    setShowCheckPrizeButton(true);
+    store.set('nextDrawingBlockNumberAfterChecked', undefined);
+  }, [selectedAccount]);
+
+  useEffect(() => {
+    if (userUnclaimedWinnings === null) {
       setHasWinning(false);
       return;
     }
     if (userUnclaimedWinnings.gt(Balance.Native(new BN(0)))) {
-      const nextDrawingBlockNumberAfterChecked = store.get(
-        'nextDrawingBlockNumberAfterChecked'
-      );
-      if (
-        !nextDrawingBlockNumberAfterChecked ||
-        currentBlockNumber >= nextDrawingBlockNumberAfterChecked
-      ) {
-        setHasWinning(true);
-      }
+      setHasWinning(true);
     } else {
       setHasWinning(false);
     }
-  }, [userUnclaimedWinnings, currentBlockNumber]);
+  }, [userUnclaimedWinnings]);
 
   useEffect(() => {
     if (!currentBlockNumber) {
@@ -126,7 +123,7 @@ const Prize = () => {
             onClick={handleCheck}
             className="btn-primary font-title w-[280px] rounded-xl h-[66px] text-xl flex items-center justify-center gap-4"
           >
-            Check Prize
+            Check for Prizes
           </button>
         );
       } else if (hasWinning) {

@@ -135,7 +135,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
           ) as any;
           let errorMsg = `${decoded.section}.${decoded.name}`;
           if (decoded.name === 'TooCloseToDrawing') {
-            errorMsg = 'Withdraw has closed for winner selection underway.';
+            errorMsg = 'Deposit has closed for winner selection underway.';
           }
           setTransferErrMsg(errorMsg);
         } else {
