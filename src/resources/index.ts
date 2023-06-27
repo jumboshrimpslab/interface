@@ -1,3 +1,4 @@
+import { ReactComponent as chevronDown } from 'resources/icons/chevron-down.svg';
 import { ReactComponent as greenCheck } from 'resources/icons/green-check.svg';
 import { ReactComponent as plusCircle } from 'resources/icons/plus-circle.svg';
 import { ReactComponent as close } from 'resources/icons/close.svg';
@@ -13,7 +14,8 @@ const icons = {
   plusCircle,
   greenCheck,
   copySquare,
-  wallet
+  wallet,
+  chevronDown
 };
 
 export default icons;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ConnectWallet from 'components/Connect/ConnectWallet';
 import Gift from 'resources/images/gift.png';
 import Medal from 'resources/images/medal.png';
@@ -57,6 +57,8 @@ const Account = () => {
   const [totalDepositAmount, setTotalDepositAmount] = useState<Balance | null>(
     null
   );
+  const [showClickMore, setShowClickMore] = useState(false);
+  const initClickMore = useRef(false);
 
   const getRemainingTimeToBeLiquid = useCallback(
     (withdrawBlockNumber: number) => {
@@ -84,6 +86,21 @@ const Account = () => {
       setTotalDepositAmount(total);
     }
   }, [userLotteryActiveBalance, userPendingWithdrawals]);
+
+  useEffect(() => {
+    if (initClickMore.current || userPendingWithdrawals === null) {
+      return;
+    }
+    if (userPendingWithdrawals?.length > 5) {
+      setShowClickMore(true);
+      initClickMore.current = true;
+    }
+  }, [userPendingWithdrawals]);
+
+  let _userPendingWithdrawals = userPendingWithdrawals;
+  if (showClickMore && userPendingWithdrawals) {
+    _userPendingWithdrawals = userPendingWithdrawals?.slice(0, 5);
+  }
 
   const disabled = !lotteryNotInDrawingFreezeout;
   if (!selectedAccount) {
@@ -241,7 +258,7 @@ const Account = () => {
           </span>
         </div>
 
-        {userPendingWithdrawals?.map((withdraw: PendingWithdrawal, index) => (
+        {_userPendingWithdrawals?.map((withdraw: PendingWithdrawal, index) => (
           <div className="font-content text-base flex gap-5 mt-2" key={index}>
             <span className="bg-primary h-[30px] flex-1 rounded-[6px] flex items-center justify-center gap-4">
               <Icon name="manta" className="w-[21px] h-[21px]" />
@@ -255,6 +272,18 @@ const Account = () => {
             </span>
           </div>
         ))}
+
+        {showClickMore && (
+          <div className="flex justify-center mt-4">
+            <button
+              className="flex flex-col items-center text-base leading-5 gap-2"
+              onClick={() => setShowClickMore(false)}
+            >
+              Click to Show More
+              <Icon name="chevronDown" />
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

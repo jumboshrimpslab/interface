@@ -128,7 +128,7 @@ const DataBoard = () => {
               }
             )}
           >
-            Last Grand Prize
+            Current Grand Prize
           </button>
         </div>
         <div className="flex justify-center">
