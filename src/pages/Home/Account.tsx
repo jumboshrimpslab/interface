@@ -16,6 +16,20 @@ import { useWallet } from 'contexts/WalletContext';
 import ConnectImage from 'resources/images/account-connect-wallet.png';
 import DepositSuccessImg from 'resources/images/deposit-success.png';
 
+function secondsToDhm(seconds: number) {
+  const day = Math.floor(seconds / (3600 * 24));
+  const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+  const minutes = Math.ceil((seconds % 3600) / 60);
+
+  const dDisplay = day > 0 ? day + (day === 1 ? ' day, ' : ' days, ') : '';
+  const hDisplay =
+    hours > 0 ? hours + (hours === 1 ? ' hour, ' : ' hours, ') : '';
+  const mDisplay =
+    minutes > 0 ? minutes + (minutes === 1 ? ' minute' : ' minutes') : '';
+
+  return dDisplay + hDisplay + mDisplay;
+}
+
 const Account = () => {
   const { selectedAccount } = useWallet();
   const {
@@ -56,8 +70,7 @@ const Account = () => {
       } else {
         totalRemainingBlocks = nextDrawingBlockNumber - currentBlockNumber;
       }
-      // for now, use minutes, will be updated before production
-      return (totalRemainingBlocks * 12) / 60 + 'min';
+      return secondsToDhm(totalRemainingBlocks * 12);
     },
     [currentBlockNumber, nextDrawingBlockNumber, unstakeLockTime]
   );
