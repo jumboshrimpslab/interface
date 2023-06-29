@@ -84,7 +84,9 @@ const WithdrawModal = ({
   const initialWinningChance = useRef(false);
 
   const { userLotteryActiveBalance, userWinningChance } = useUserLotteryData();
-  const { sumOfDeposits, minWithdraw } = useGlobalLotteryData();
+  const { sumOfDeposits, minWithdraw, lotteryNotInDrawingFreezeout } =
+    useGlobalLotteryData();
+  const freezeoutValue = useRef(lotteryNotInDrawingFreezeout);
   const { withdrawTxFee } = useLotteryTx();
   const { api, apiState } = useSubstrate();
   const { selectedAccount } = useWallet();
@@ -96,12 +98,12 @@ const WithdrawModal = ({
       sumOfDeposits === null
     ) {
       validateErrMsg && setValidateErrMsg('');
-      transferErrMsg && setTransferErrMsg('');
+      lotteryNotInDrawingFreezeout && transferErrMsg && setTransferErrMsg('');
       setIsButtonDisabled(true);
       setWinningChance(userWinningChance);
       return;
     }
-    transferErrMsg && setTransferErrMsg('');
+    lotteryNotInDrawingFreezeout && transferErrMsg && setTransferErrMsg('');
 
     const inputBalanceValue = Balance.Native(
       new BN(inputValue).mul(new BN(10).pow(new BN(decimals)))
@@ -114,7 +116,7 @@ const WithdrawModal = ({
       !isButtonDisabled && setIsButtonDisabled(true);
     } else {
       validateErrMsg && setValidateErrMsg('');
-      setIsButtonDisabled(false);
+      lotteryNotInDrawingFreezeout && setIsButtonDisabled(false);
     }
 
     const newWinningChance = calculateWinningChance(
@@ -152,7 +154,7 @@ const WithdrawModal = ({
       } else {
         setWithdrawSuccess(true);
       }
-      setIsButtonDisabled(false);
+      freezeoutValue.current && setIsButtonDisabled(false);
       setSubmitting(false);
     }
   };
@@ -193,6 +195,14 @@ const WithdrawModal = ({
   };
 
   useEffect(() => {
+    freezeoutValue.current = lotteryNotInDrawingFreezeout;
+    setIsButtonDisabled(!lotteryNotInDrawingFreezeout);
+    if (lotteryNotInDrawingFreezeout) {
+      transferErrMsg && setTransferErrMsg('');
+    }
+  }, [lotteryNotInDrawingFreezeout]);
+
+  useEffect(() => {
     if (userWinningChance !== '' && !initialWinningChance.current) {
       setWinningChance(userWinningChance);
       initialWinningChance.current = true;
@@ -229,7 +239,9 @@ const WithdrawModal = ({
               </button>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <div>Balance: {userLotteryActiveBalance?.toString(2)} MANTA</div>
+              <div>
+                Deposited Balance: {userLotteryActiveBalance?.toString(2)} MANTA
+              </div>
               {validateErrMsg && (
                 <div className="flex items-center text-warning gap-2">
                   <Icon name="information" />

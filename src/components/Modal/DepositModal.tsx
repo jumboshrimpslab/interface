@@ -58,9 +58,11 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
   const {
     sumOfDeposits,
     minDeposit,
+    lotteryNotInDrawingFreezeout,
     isPrizeTabSelected,
     setIsPrizeTabSelected
   } = useGlobalLotteryData();
+  const freezeoutValue = useRef(lotteryNotInDrawingFreezeout);
   const { api, apiState } = useSubstrate();
   const { selectedAccount } = useWallet();
   const { depositTxFee } = useLotteryTx();
@@ -79,12 +81,12 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
       !depositTxFee
     ) {
       validateErrMsg && setValidateErrMsg('');
-      transferErrMsg && setTransferErrMsg('');
+      lotteryNotInDrawingFreezeout && transferErrMsg && setTransferErrMsg('');
       setIsButtonDisabled(true);
       setWinningChance(userWinningChance);
       return;
     }
-    transferErrMsg && setTransferErrMsg('');
+    lotteryNotInDrawingFreezeout && transferErrMsg && setTransferErrMsg('');
 
     const inputBalanceValue = Balance.fromBaseUnits(
       AssetType.Native(),
@@ -106,7 +108,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
       !isButtonDisabled && setIsButtonDisabled(true);
     } else {
       validateErrMsg && setValidateErrMsg('');
-      setIsButtonDisabled(false);
+      lotteryNotInDrawingFreezeout && setIsButtonDisabled(false);
     }
 
     const newWinningChance = calculateWinningChance(
@@ -144,10 +146,18 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
       } else {
         setDepositSuccess(true);
       }
-      setIsButtonDisabled(false);
+      freezeoutValue.current && setIsButtonDisabled(false);
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    freezeoutValue.current = lotteryNotInDrawingFreezeout;
+    setIsButtonDisabled(!lotteryNotInDrawingFreezeout);
+    if (lotteryNotInDrawingFreezeout) {
+      transferErrMsg && setTransferErrMsg('');
+    }
+  }, [lotteryNotInDrawingFreezeout]);
 
   const handleDeposit = async () => {
     if (!api || apiState !== 'READY' || !selectedAccount || !value) {
