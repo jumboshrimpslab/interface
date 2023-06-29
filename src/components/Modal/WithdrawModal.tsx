@@ -174,7 +174,7 @@ const WithdrawModal = ({
         )
         .signAndSend(
           selectedAccount.address,
-          { signer: selectedAccount.signer as Signer },
+          { signer: selectedAccount.signer as Signer, nonce: -1 },
           handleTxRes
         );
     } catch (e: any) {
