@@ -11,6 +11,7 @@ import BN from 'bn.js';
 import axios from 'axios';
 import store from 'store';
 import Balance from 'classes/Balance';
+import config from 'config';
 import { useSubstrate } from './SubstrateContext';
 import { useAxios } from './AxiosContext';
 
@@ -75,7 +76,7 @@ const GlobalLotteryDataContextProvider = ({
       }
       try {
         const response = await axios.post(
-          'https://crispy.baikal.testnet.calamari.systems',
+          config.RPC_ENDPOINT,
           {
             jsonrpc: '2.0',
             id: 1,
@@ -104,7 +105,7 @@ const GlobalLotteryDataContextProvider = ({
       }
       try {
         const response = await axios.post(
-          'https://crispy.baikal.testnet.calamari.systems',
+          config.RPC_ENDPOINT,
           {
             jsonrpc: '2.0',
             id: 1,
@@ -133,7 +134,7 @@ const GlobalLotteryDataContextProvider = ({
       }
       try {
         const response = await axios.post(
-          'https://crispy.baikal.testnet.calamari.systems',
+          config.RPC_ENDPOINT,
           {
             jsonrpc: '2.0',
             id: 1,

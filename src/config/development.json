@@ -1,3 +1,4 @@
 {
-  "PROVIDER_SOCKET": "wss://crispy.baikal.testnet.calamari.systems"
+  "PROVIDER_SOCKET": "wss://crispy.baikal.testnet.calamari.systems",
+  "RPC_ENDPOINT": "https://crispy.baikal.testnet.calamari.systems"
 }
