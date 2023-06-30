@@ -128,8 +128,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
     const status = tx.status;
     const dispatchError = tx.dispatchError;
     console.log('Transaction status:', status.type);
-    if (status.isFinalized) {
-      console.log('Finalized block hash', status.asFinalized.toHex());
+    if (status.isInBlock) {
       if (dispatchError) {
         if (dispatchError.isModule) {
           const decoded = api?.registry.findMetaError(

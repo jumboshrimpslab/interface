@@ -25,8 +25,7 @@ const Prize = () => {
     const status = tx.status;
     const events = tx.events;
     console.log('Transaction status:', status.type);
-    if (status.isFinalized) {
-      console.log('Finalized block hash', status.asFinalized.toHex());
+    if (status.isInBlock) {
       events.forEach(({ event }: any) => {
         const { data } = event;
         if (api?.events.system.ExtrinsicFailed.is(event)) {
