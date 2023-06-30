@@ -42,8 +42,8 @@ export default class AssetType {
       'Calamari',
       'KMA',
       'calamari',
-      18,
-      new BN('100000000000000000'),
+      12,
+      new BN('100000000000'),
       'calamari-network'
     );
   }
