@@ -101,13 +101,38 @@ const DataBoard = () => {
   };
 
   return (
-    <>
-      <div className="w-[1200px] mx-auto h-[164px] rounded-3xl bg-primary my-6">
-        <div className="font-title text-secondary text-2xl py-6 leading-6">
-          Total Deposit
+    <div className="w-[1200px] flex items-center justify-between mx-auto my-6">
+      <div className="w-[590px] h-[182px] rounded-3xl bg-primary px-[37px] py-6 relative">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setTotalPotIsSelected(true)}
+            className={classNames(
+              'w-[248px] h-[50px] rounded-[40px] font-title',
+              {
+                'bg-button-primary text-white': totalPotIsSelected,
+                'bg-button-primary/20 text-secondary/50 border border-primary/50':
+                  !totalPotIsSelected
+              }
+            )}
+          >
+            Total Deposit
+          </button>
+          <button
+            onClick={() => setTotalPotIsSelected(false)}
+            className={classNames(
+              'w-[248px] h-[50px] rounded-[40px] font-title',
+              {
+                'bg-button-primary text-white': !totalPotIsSelected,
+                'bg-button-primary/20 text-secondary/50 border border-primary/50':
+                  totalPotIsSelected
+              }
+            )}
+          >
+            Current Grand Prize
+          </button>
         </div>
         <div className="flex justify-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-[15px]">
             <span className="font-title text-[40px] leading-[68px]">
               {totalAmountString}
             </span>
@@ -116,59 +141,39 @@ const DataBoard = () => {
             )}
           </div>
         </div>
+        <img
+          className="absolute top-[32px] -left-[88px]"
+          src={Calculator}
+          width="180"
+          height="180"
+          alt="calculator"
+        />
       </div>
-      <div className="w-[1200px] flex items-center justify-between mx-auto my-6">
-        <div className="w-[590px] h-[182px] rounded-3xl bg-primary relative">
-          <div className="font-content text-sm mt-6">Time Left for</div>
-          <div className="font-title text-secondary text-[24px] leading-6 mt-1">
-            Draw #1
-          </div>
-          <div className="font-title text-[40px] leading-[68px] flex justify-center mt-2">
-            {nextDrawingTime ? (
-              <Countdown
-                key={nextDrawingTime.getTime()}
-                date={nextDrawingTime.getTime()}
-                renderer={renderer}
-              />
-            ) : (
-              <CountdownPlaceholder />
-            )}
-          </div>
-          <img
-            className="absolute top-[32px] -left-[88px]"
-            src={Calculator}
-            width="180"
-            height="180"
-            alt="calculator"
-          />
+      <div className="w-[590px] h-[182px] rounded-3xl bg-primary relative">
+        <div className="font-content text-sm mt-6">Time Left for</div>
+        <div className="font-title text-secondary text-[24px] leading-6 mt-1">
+          Draw #1
         </div>
-        <div className="flex justify-center w-[590px] h-[182px] rounded-3xl bg-primary px-[37px] py-6 relative">
-          <div className="flex items-center justify-between w-full pr-[23px]">
-            <div>
-              <div className="text-base leading-5">Potential Prize for</div>
-              <div className="font-title text-secondary text-2xl leading-6 mt-1">
-                Draw #1
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-[15px]">
-              <span className="font-title text-[40px] leading-[68px]">
-                {totalAmountString}
-              </span>
-              {totalAmount && (
-                <span className="font-content text-base font-black">MANTA</span>
-              )}
-            </div>
-          </div>
-          <img
-            className="absolute top-[32px] -right-[96px]"
-            src={Clock}
-            width="180"
-            height="180"
-            alt="clock"
-          />
+        <div className="font-title text-[40px] leading-[68px] flex justify-center mt-2">
+          {nextDrawingTime ? (
+            <Countdown
+              key={nextDrawingTime.getTime()}
+              date={nextDrawingTime.getTime()}
+              renderer={renderer}
+            />
+          ) : (
+            <CountdownPlaceholder />
+          )}
         </div>
+        <img
+          className="absolute top-[32px] -right-[96px]"
+          src={Clock}
+          width="180"
+          height="180"
+          alt="clock"
+        />
       </div>
-    </>
+    </div>
   );
 };
 
