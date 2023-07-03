@@ -1,5 +1,4 @@
 import Countdown, { zeroPad } from 'react-countdown';
-import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Calculator from 'resources/images/calculator.png';
 import Clock from 'resources/images/clock.png';
@@ -37,7 +36,6 @@ const CountdownPlaceholder = () => {
 };
 
 const DataBoard = () => {
-  const [totalPotIsSelected, setTotalPotIsSelected] = useState(true);
   const [nextDrawingTime, setNextDrawingTime] = useState<Date | undefined>(
     undefined
   );
@@ -58,11 +56,14 @@ const DataBoard = () => {
     setNextDrawingTime(new Date(currentTime + nextDrawingTime * 1000));
   }, [currentBlockNumber, nextDrawingBlockNumber]);
 
-  const totalAmount = totalPotIsSelected
-    ? sumOfDeposits?.toString(0)
-    : currentPrizePool?.toString(2);
+  const totalAmount = sumOfDeposits?.toString(0);
   const totalAmountString = totalAmount
     ? Number(totalAmount).toLocaleString()
+    : '--';
+
+  const totalPrize = currentPrizePool?.toString(2);
+  const totalPrizeString = totalPrize
+    ? Number(totalPrize).toLocaleString()
     : '--';
 
   const renderer = (time: any) => {
@@ -152,9 +153,9 @@ const DataBoard = () => {
             </div>
             <div className="flex items-center gap-2 mt-[15px]">
               <span className="font-title text-[40px] leading-[68px]">
-                {totalAmountString}
+                {totalPrizeString}
               </span>
-              {totalAmount && (
+              {totalPrize && (
                 <span className="font-content text-base font-black">MANTA</span>
               )}
             </div>
