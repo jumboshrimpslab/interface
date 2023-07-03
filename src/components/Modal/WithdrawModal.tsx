@@ -4,6 +4,7 @@ import { Nullable } from 'primereact/ts-helpers';
 import BN from 'bn.js';
 import Decimal from 'decimal.js';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { toast } from 'react-toastify';
 import Icon from 'components/Icon';
 import Ring from 'resources/images/deposit-success.png';
 import { useUserLotteryData } from 'contexts/UserLotteryDataContext';
@@ -14,6 +15,7 @@ import AssetType from 'classes/AssetType';
 import calculateWinningChance from 'utils/display/calculateWinningChance';
 import { useWallet } from 'contexts/WalletContext';
 import { useLotteryTx } from 'contexts/LotteryTxContext';
+import TxResToast from 'components/TxResToast';
 import type { Signer } from '@polkadot/api/types';
 
 const decimals = AssetType.Native().numberOfDecimals;
@@ -147,11 +149,32 @@ const WithdrawModal = ({
             errorMsg = 'Withdraw has closed for winner selection underway.';
           }
           setTransferErrMsg(errorMsg);
+          toast(
+            <TxResToast
+              isSuccess={false}
+              content={
+                <div>
+                  Withdraw failed.<div>{errorMsg}</div>
+                </div>
+              }
+            />
+          );
         } else {
           setTransferErrMsg(dispatchError.toString());
+          toast(
+            <TxResToast
+              isSuccess={false}
+              content={
+                <div>
+                  Withdraw failed.<div>{dispatchError.toString()}</div>
+                </div>
+              }
+            />
+          );
         }
       } else {
         setWithdrawSuccess(true);
+        toast(<TxResToast isSuccess content="Withdraw succeeded." />);
       }
       freezeoutValue.current && setIsButtonDisabled(false);
       setSubmitting(false);

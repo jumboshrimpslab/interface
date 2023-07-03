@@ -4,6 +4,7 @@ import { Nullable } from 'primereact/ts-helpers';
 import BN from 'bn.js';
 import Decimal from 'decimal.js';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { toast } from 'react-toastify';
 import Icon from 'components/Icon';
 import Ring from 'resources/images/deposit-success.png';
 import { useUserLotteryData } from 'contexts/UserLotteryDataContext';
@@ -14,6 +15,7 @@ import { useSubstrate } from 'contexts/SubstrateContext';
 import calculateWinningChance from 'utils/display/calculateWinningChance';
 import { useLotteryTx } from 'contexts/LotteryTxContext';
 import { useWallet } from 'contexts/WalletContext';
+import TxResToast from 'components/TxResToast';
 import type { Signer } from '@polkadot/api/types';
 
 const decimals = AssetType.Native().numberOfDecimals;
@@ -139,11 +141,32 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
             errorMsg = 'Deposit has closed for winner selection underway.';
           }
           setTransferErrMsg(errorMsg);
+          toast(
+            <TxResToast
+              isSuccess={false}
+              content={
+                <div>
+                  Deposit failed.<div>{errorMsg}</div>
+                </div>
+              }
+            />
+          );
         } else {
           setTransferErrMsg(dispatchError.toString());
+          toast(
+            <TxResToast
+              isSuccess={false}
+              content={
+                <div>
+                  Deposit failed.<div>{dispatchError.toString()}</div>
+                </div>
+              }
+            />
+          );
         }
       } else {
         setDepositSuccess(true);
+        toast(<TxResToast isSuccess content="Deposit succeeded." />);
       }
       freezeoutValue.current && setIsButtonDisabled(false);
       setSubmitting(false);

@@ -22,7 +22,7 @@ const ModalContainer: React.FC<{ children: React.ReactNode }> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 50
+      zIndex: 10000
     }}
   >
     {children}

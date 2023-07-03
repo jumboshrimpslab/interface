@@ -6,6 +6,8 @@ import { ReactComponent as information } from 'resources/icons/information.svg';
 import { ReactComponent as manta } from 'resources/icons/manta.svg';
 import { ReactComponent as copySquare } from 'resources/icons/copy-square.svg';
 import { ReactComponent as wallet } from 'resources/icons/wallet.svg';
+import { ReactComponent as toastSuccess } from 'resources/icons/toast-success.svg';
+import { ReactComponent as toastError } from 'resources/icons/toast-error.svg';
 
 const icons = {
   manta,
@@ -15,7 +17,9 @@ const icons = {
   greenCheck,
   copySquare,
   wallet,
-  chevronDown
+  chevronDown,
+  toastSuccess,
+  toastError
 };
 
 export default icons;
