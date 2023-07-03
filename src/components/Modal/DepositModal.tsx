@@ -214,6 +214,19 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
     }
   }, [userWinningChance]);
 
+  // fix https://github.com/Manta-Network/jumboshrimps-front-end/issues/23
+  // the balance was refreshed before `isInBlock`, here just mock a synchronous behavior
+  const [displayUserNonStakedBalance, setDisplayUserNonStakedBalance] =
+    useState(userNonStakedBalance);
+  const [displayUserLotteryActiveBalance, setDisplayUserLotteryActiveBalance] =
+    useState(userLotteryActiveBalance);
+  useEffect(() => {
+    if (!submitting) {
+      setDisplayUserNonStakedBalance(userNonStakedBalance);
+      setDisplayUserLotteryActiveBalance(userLotteryActiveBalance);
+    }
+  }, [userNonStakedBalance, userLotteryActiveBalance, submitting]);
+
   return (
     <div className="w-[509px] text-left">
       <h1 className="text-2xl leading-10 text-secondary font-title">
@@ -244,7 +257,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
             </button>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <div>Balance: {userNonStakedBalance?.toString(2)} MANTA</div>
+            <div>Balance: {displayUserNonStakedBalance?.toString(2)} MANTA</div>
             {validateErrMsg && (
               <div className="flex items-center text-warning gap-2">
                 <Icon name="information" />
@@ -254,7 +267,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
           </div>
           <div className="flex items-center justify-between text-base leading-5 mt-6 mb-4">
             <span>Current Deposit Balance</span>
-            <span>{userLotteryActiveBalance?.toString(2)} MANTA</span>
+            <span>{displayUserLotteryActiveBalance?.toString(2)} MANTA</span>
           </div>
           <div className="flex items-center justify-between text-base leading-5 mb-4">
             <span>Winning Chance</span>

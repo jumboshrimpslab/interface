@@ -208,6 +208,16 @@ const WithdrawModal = ({
     }
   }, [userWinningChance]);
 
+  // fix https://github.com/Manta-Network/jumboshrimps-front-end/issues/23
+  // the balance was refreshed before `isInBlock`, here just mock a synchronous behavior
+  const [displayUserLotteryActiveBalance, setDisplayUserLotteryActiveBalance] =
+    useState(userLotteryActiveBalance);
+  useEffect(() => {
+    if (!submitting) {
+      setDisplayUserLotteryActiveBalance(userLotteryActiveBalance);
+    }
+  }, [userLotteryActiveBalance, submitting]);
+
   return (
     <div className="w-[509px] text-left">
       {withdrawSuccess ? (
@@ -239,7 +249,8 @@ const WithdrawModal = ({
             </div>
             <div className="flex items-center justify-between text-sm">
               <div>
-                Deposited Balance: {userLotteryActiveBalance?.toString(2)} MANTA
+                Deposited Balance:{' '}
+                {displayUserLotteryActiveBalance?.toString(2)} MANTA
               </div>
               {validateErrMsg && (
                 <div className="flex items-center text-warning gap-2">
