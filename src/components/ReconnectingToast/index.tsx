@@ -13,7 +13,7 @@ const Content = () => (
       height="97"
       alt="reconnecting image"
     />
-    <div className="font-content text-[#fe7017] text-base leading-5 mt-4">
+    <div className="font-content text-white text-base leading-5 mt-4">
       Reconnecting to Manta Network ...
     </div>
   </div>
@@ -21,7 +21,7 @@ const Content = () => (
 
 const CloseButton = ({ closeToast }: any) => (
   <div onClick={closeToast}>
-    <Icon name="close" className="w-4 h-4" />
+    <Icon name="toastClose" className="w-4 h-4" />
   </div>
 );
 

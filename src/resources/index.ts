@@ -2,6 +2,7 @@ import { ReactComponent as chevronDown } from 'resources/icons/chevron-down.svg'
 import { ReactComponent as greenCheck } from 'resources/icons/green-check.svg';
 import { ReactComponent as plusCircle } from 'resources/icons/plus-circle.svg';
 import { ReactComponent as close } from 'resources/icons/close.svg';
+import { ReactComponent as toastClose } from 'resources/icons/toast-close.svg';
 import { ReactComponent as information } from 'resources/icons/information.svg';
 import { ReactComponent as manta } from 'resources/icons/manta.svg';
 import { ReactComponent as copySquare } from 'resources/icons/copy-square.svg';
@@ -13,6 +14,7 @@ const icons = {
   manta,
   information,
   close,
+  toastClose,
   plusCircle,
   greenCheck,
   copySquare,

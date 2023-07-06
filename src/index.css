@@ -48,3 +48,6 @@ input[type=number]::-webkit-outer-spin-button {
   right: 120px;
   top: 139px
 }
+.Toastify__toast-theme--light {
+  background-color: rgba(100, 47, 17, 0.80);
+}
