@@ -175,7 +175,14 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
 
   useEffect(() => {
     freezeoutValue.current = lotteryNotInDrawingFreezeout;
-    setIsButtonDisabled(!lotteryNotInDrawingFreezeout);
+    if (
+      (lotteryNotInDrawingFreezeout && !value) ||
+      !lotteryNotInDrawingFreezeout
+    ) {
+      setIsButtonDisabled(true);
+    } else {
+      setIsButtonDisabled(false);
+    }
     if (lotteryNotInDrawingFreezeout) {
       transferErrMsg && setTransferErrMsg('');
     }
