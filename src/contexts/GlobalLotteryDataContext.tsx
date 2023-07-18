@@ -89,7 +89,9 @@ const GlobalLotteryDataContextProvider = ({
             }
           }
         );
-        setCurrentPrizePool(Balance.Native(new BN(response.data.result)));
+        setCurrentPrizePool(
+          Balance.Native(new BN(response.data.result.toString()))
+        );
       } catch (error) {
         console.error(error);
         setCurrentPrizePool(null);

@@ -1,10 +1,6 @@
 // @ts-nocheck
 import BN from 'bn.js';
 
-const CalamariAssetIds = {
-  KMA: 1
-};
-
 export default class AssetType {
   assetId: number;
   name: string;
@@ -33,18 +29,18 @@ export default class AssetType {
   }
 
   static Native() {
-    return AssetType.Calamari();
+    return AssetType.Manta();
   }
 
-  static Calamari() {
+  static Manta() {
     return new AssetType(
-      CalamariAssetIds.KMA,
-      'Calamari',
-      'KMA',
-      'calamari',
-      12,
-      new BN('100000000000'),
-      'calamari-network'
+      1,
+      'Manta',
+      'MANTA',
+      'manta',
+      18,
+      new BN('100000000000000000'),
+      'manata-network'
     );
   }
 }

@@ -1,4 +1,4 @@
 {
-  "PROVIDER_SOCKET": "wss://crispy.baikal.testnet.calamari.systems",
-  "RPC_ENDPOINT": "https://crispy.baikal.testnet.calamari.systems"
+  "PROVIDER_SOCKET": "wss://c1.baikal.testnet.manta.systems",
+  "RPC_ENDPOINT": "https://c1.baikal.testnet.manta.systems/"
 }

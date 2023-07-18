@@ -295,7 +295,7 @@ const WithdrawModal = ({
             </div>
             <div className="flex items-center justify-between text-base leading-5 mb-6">
               <span>Withdraw Gas Fee</span>
-              <span>{withdrawTxFee?.toString(2)} MANTA</span>
+              <span>{withdrawTxFee?.toString(4)} MANTA</span>
             </div>
             <button
               onClick={handleWithdraw}

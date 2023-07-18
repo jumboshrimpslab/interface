@@ -77,13 +77,13 @@ const UserLotteryDataContextProvider = ({
         (withdrawal: any) => {
           const withdrawalAddress = encodeAddress(
             withdrawal.user,
-            config.SS58_FORMAT.CALAMARI
+            config.SS58_FORMAT.MANTA
           );
           return (
             withdrawalAddress ===
             encodeAddress(
               selectedAccount?.address as any,
-              config.SS58_FORMAT.CALAMARI
+              config.SS58_FORMAT.MANTA
             )
           );
         }

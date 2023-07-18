@@ -305,7 +305,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
           </div>
           <div className="flex items-center justify-between text-base leading-5 mb-6">
             <span>Deposit Gas Fee</span>
-            <span>{depositTxFee?.toString(2)} MANTA</span>
+            <span>{depositTxFee?.toString(4)} MANTA</span>
           </div>
           <button
             onClick={handleDeposit}
