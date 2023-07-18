@@ -1,9 +1,11 @@
 import classNames from 'classnames';
 import { Identicon } from '@polkadot/react-identicon';
+import { encodeAddress } from '@polkadot/util-crypto';
 import CopyPasteIcon from 'components/CopyPasteIcon';
 import getAbbreviatedName from 'utils/display/getAbbreviatedName';
 import Icon from 'components/Icon';
 import { useWallet } from 'contexts/WalletContext';
+import config from 'config';
 
 const SingleAccountDisplay = ({
   accountName,
@@ -69,7 +71,10 @@ const AccountSelectDropdown = () => {
         <SingleAccountDisplay
           key={account.address}
           accountName={(account as any).name}
-          accountAddress={account.address}
+          accountAddress={encodeAddress(
+            account.address,
+            config.SS58_FORMAT.MANTA
+          )}
           isAccountSelected={account.address === selectedAccount?.address}
           onClickAccountHandler={() => changeSelectedAccount(account)}
         />
