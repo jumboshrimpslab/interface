@@ -189,6 +189,7 @@ const WithdrawModal = ({
     setSubmitting(true);
     transferErrMsg && setTransferErrMsg('');
 
+    Decimal.set({ toExpPos: 30 });
     try {
       await api.tx.lottery
         .requestWithdraw(

@@ -195,7 +195,7 @@ const DepositModal = ({ hideModal }: { hideModal: () => void }) => {
     setIsButtonDisabled(true);
     setSubmitting(true);
     transferErrMsg && setTransferErrMsg('');
-
+    Decimal.set({ toExpPos: 30 });
     try {
       await api.tx.lottery
         .deposit(
